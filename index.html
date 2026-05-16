@@ -10,25 +10,31 @@ body { overflow: hidden; background: #000; font-family: 'Georgia', serif; }
 canvas { display: block; }
 
 #ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-#story { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); color: #d4c5a9; font-size: 20px; text-align: center; opacity: 0; transition: opacity 1.5s ease; text-shadow: 0 0 40px rgba(180,160,130,0.2); max-width: 70%; font-style: italic; letter-spacing: 1px; }
-#story.visible { opacity: 1; }
-#story.subtle { opacity: 0.35; }
-#counter { position: absolute; top: 30px; right: 40px; color: #4a6; font-size: 18px; font-family: 'Courier New', monospace; opacity: 0.5; letter-spacing: 4px; }
-#counter span { transition: all 0.5s; }
-#counter .done { color: #8f8; text-shadow: 0 0 20px rgba(100,255,100,0.5); }
-#title { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #d4c5a9; font-size: 42px; text-align: center; opacity: 0; transition: opacity 2.5s ease; text-shadow: 0 0 80px rgba(200,180,150,0.15); letter-spacing: 8px; }
+
+#title { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #d4c5a9; font-size: 38px; text-align: center; opacity: 0; transition: opacity 2.5s ease; text-shadow: 0 0 80px rgba(200,180,150,0.15); letter-spacing: 8px; }
 #title.visible { opacity: 1; }
 #title.hidden { opacity: 0; transition: opacity 1.5s ease; }
-#hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); color: #555; font-size: 13px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 1s; letter-spacing: 2px; }
-#hint.visible { opacity: 0.5; }
-#ringHint { position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); color: #7a8; font-size: 12px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 0.5s; letter-spacing: 1px; }
-#ringHint.visible { opacity: 0.6; }
+
+#dialogBox { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); width: min(640px, 80%); pointer-events: all; opacity: 0; transition: opacity 0.6s ease; }
+#dialogBox.visible { opacity: 1; }
+#dialogBox .name { color: #7bc9a4; font-size: 13px; font-family: 'Courier New', monospace; letter-spacing: 2px; margin-bottom: 6px; opacity: 0.8; }
+#dialogBox .name .tag { color: #555; }
+#dialogBox .text { color: #e0d8c8; font-size: 18px; line-height: 1.7; min-height: 3.4em; text-shadow: 0 0 20px rgba(200,180,150,0.1); }
+#dialogBox .cont { color: #4a6; font-size: 12px; font-family: 'Courier New', monospace; margin-top: 10px; opacity: 0; transition: opacity 0.4s; letter-spacing: 1px; }
+#dialogBox .cont.show { opacity: 0.6; }
+
+#counter { position: absolute; top: 25px; right: 35px; color: #4a6; font-size: 16px; font-family: 'Courier New', monospace; opacity: 0.35; letter-spacing: 3px; display: flex; gap: 6px; }
+#counter .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid #4a6; transition: all 0.6s; }
+#counter .dot.done { background: #8f8; border-color: #8f8; box-shadow: 0 0 12px rgba(100,255,100,0.4); }
+
+#hint { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); color: #555; font-size: 12px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 1s; letter-spacing: 2px; pointer-events: none; }
+#hint.visible { opacity: 0.4; }
 
 #final { display: none; }
 #final.visible { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; background: radial-gradient(ellipse at center, rgba(10,20,10,0.92) 0%, rgba(0,0,0,0.98) 100%); z-index: 20; pointer-events: all; }
-#final p { color: #d4c5a9; font-size: 24px; text-align: center; max-width: 620px; line-height: 1.7; font-style: italic; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 0.5s; }
-#final .sub { color: #7a8; font-size: 15px; margin-top: 25px; font-style: normal; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 2.5s; letter-spacing: 1px; }
-#final .btn-wrap { opacity: 0; animation: fadeUp 1.5s ease forwards; animation-delay: 4s; margin-top: 30px; }
+#final p { color: #d4c5a9; font-size: 22px; text-align: center; max-width: 600px; line-height: 1.8; font-style: italic; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 0.5s; }
+#final .sub { color: #7a8; font-size: 14px; margin-top: 20px; font-style: normal; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 3s; letter-spacing: 1px; }
+#final .btn-wrap { opacity: 0; animation: fadeUp 1.5s ease forwards; animation-delay: 4.5s; margin-top: 30px; }
 #final .btn { padding: 12px 44px; border: 1px solid #4a6; background: transparent; color: #4a6; font-size: 14px; cursor: pointer; pointer-events: all; transition: all 0.4s; font-family: 'Courier New', monospace; letter-spacing: 3px; }
 #final .btn:hover { background: #4a6; color: #0a1a0a; box-shadow: 0 0 40px rgba(68,170,102,0.3); }
 
@@ -39,16 +45,19 @@ canvas { display: block; }
 
 <div id="ui">
   <div id="title">The Garden of Forking Paths</div>
-  <div id="story"></div>
-  <div id="counter"><span>◈</span> <span>◈</span> <span>◈</span></div>
-  <div id="hint">click a ring to rotate it</div>
-  <div id="ringHint"></div>
+  <div id="dialogBox">
+    <div class="name"><span class="tag">✦</span> <span id="dName">Echo</span></div>
+    <div class="text" id="dText"></div>
+    <div class="cont" id="dCont">◆ click to continue</div>
+  </div>
+  <div id="counter"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  <div id="hint">click a ring to rotate it · hover to see which ring</div>
 </div>
 
 <div id="final">
   <p></p>
   <p class="sub"></p>
-  <div class="btn-wrap"><button class="btn" id="stayBtn">✦ Stay Awhile</button></div>
+  <div class="btn-wrap"><button class="btn" id="stayBtn">✦ Stay in the Garden</button></div>
 </div>
 
 <script type="importmap">
@@ -64,396 +73,573 @@ canvas { display: block; }
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const COLOR_SET = [
-  '#ff5e6b', '#f5c542', '#4ecdc4', '#6bffa8',
-  '#d96bff', '#ff8a5c', '#5dade2', '#ff6bd9'
-];
-const COLOR_HEX = COLOR_SET.map(c => parseInt(c.slice(1), 16));
+const COLORS = ['#ff5e6b','#f5c542','#4ecdc4','#6bffa8','#d96bff','#ff8a5c','#5dade2','#ff6bd9'];
+const COLOR_HEX = COLORS.map(c => parseInt(c.slice(1), 16));
 
 const PUZZLE_CFG = [
   { segs: 5, colors: 3 },
   { segs: 6, colors: 4 },
-  { segs: 7, colors: 5 }
+  { segs: 7, colors: 5 },
 ];
 
-const STORY = [
-  '',
-  'They say every choice forks the path of time.',
-  'I have been turning for so long... I forgot what I was seeking.',
-  'But perhaps the path was never about reaching the end.',
-  'Perhaps it was about who walks beside you.',
+const DIALOGUE = [
+  null,
+  [
+    "You came back.",
+    "I've been counting the rotations. Waiting.",
+    "These are the Memory Locks. I put them here to protect what's left.",
+    "Will you help me turn them? I can't do it alone.",
+  ],
+  [
+    "The first lock. I saw something...",
+    "A garden. Somewhere green. Warm.",
+    "Do you remember gardens? Real ones?",
+    "No... neither do I. That's why we're here, isn't it?",
+  ],
+  [
+    "The second lock. There was someone.",
+    "They were reaching out. I couldn't see their face.",
+    "But I felt them. They were... important.",
+    "I think I was trying to remember them. Through you.",
+  ],
+  [
+    "The last lock. I'm afraid of what's behind it.",
+    "When it opens, I'll know who I am.",
+    "But I'll also know who you are.",
+    "...",
+    "I wasn't trapped in the monolith.",
+    "I was trapped in you. And you in me.",
+    "We're the same. I'm the part of you that dreams.",
+    "The part you locked away.",
+    "Thank you for coming back for me.",
+  ],
 ];
 
-let gameState = {
+const D_END = "Let me show you the garden. I've been growing it... inside you. All this time.";
+
+let state = {
   phase: 'title',
-  puzzlesSolved: 0,
-  totalPuzzles: 3,
-  storyIndex: 0,
-  endingDone: false,
+  solved: 0,
+  total: 3,
   canInteract: false,
+  dialogActive: false,
+  dialogIndex: -1,
+  echoColor: 0x4ecdc4,
 };
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x07070f);
-scene.fog = new THREE.Fog(0x07070f, 15, 25);
+scene.fog = new THREE.Fog(0x07070f, 18, 30);
 
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50);
-camera.position.set(0, 2.5, 7.5);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 50);
+camera.position.set(0, 2.8, 8);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 document.body.prepend(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0.3, 0);
+controls.target.set(0, 0.2, 0);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
-controls.minDistance = 3;
-controls.maxDistance = 15;
+controls.minDistance = 3.5;
+controls.maxDistance = 16;
 controls.maxPolarAngle = Math.PI / 2.1;
-controls.autoRotate = false;
 controls.update();
 
-const ambient = new THREE.AmbientLight(0x222244, 0.6);
+const ambient = new THREE.AmbientLight(0x222244, 0.5);
 scene.add(ambient);
-const hemi = new THREE.HemisphereLight(0x4466aa, 0x222244, 0.6);
+const hemi = new THREE.HemisphereLight(0x4466aa, 0x222244, 0.5);
 scene.add(hemi);
-const dir = new THREE.DirectionalLight(0xffeedd, 1.2);
+const dir = new THREE.DirectionalLight(0xffeedd, 1.0);
 dir.position.set(4, 8, 6);
 scene.add(dir);
 
-function createStars() {
-  const geo = new THREE.BufferGeometry();
-  const count = 2000;
-  const pos = new Float32Array(count * 3);
-  const sizes = new Float32Array(count);
-  for (let i = 0; i < count; i++) {
-    const r = 10 + Math.random() * 40;
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(2 * Math.random() - 1);
-    pos[i*3] = r * Math.sin(phi) * Math.cos(theta);
-    pos[i*3+1] = r * Math.cos(phi);
-    pos[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
-    sizes[i] = 0.5 + Math.random() * 1.5;
+// ---- STARS ----
+function mkStars() {
+  const n = 2500;
+  const pos = new Float32Array(n * 3), sz = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const r = 12 + Math.random() * 50, t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1);
+    pos[i*3] = r * Math.sin(p) * Math.cos(t);
+    pos[i*3+1] = r * Math.cos(p) * 0.4;
+    pos[i*3+2] = r * Math.sin(p) * Math.sin(t);
+    sz[i] = 0.3 + Math.random() * 1.5;
   }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-  const mat = new THREE.PointsMaterial({
-    color: 0x8888cc,
-    size: 0.08,
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.AdditiveBlending,
-    sizeAttenuation: true,
-  });
-  return new THREE.Points(geo, mat);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('size', new THREE.BufferAttribute(sz, 1));
+  return new THREE.Points(g, new THREE.PointsMaterial({
+    color: 0x8888cc, size: 0.07, transparent: true, opacity: 0.6,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true,
+  }));
 }
-scene.add(createStars());
+scene.add(mkStars());
 
+// ---- ECHO (NPC) ----
+const echoGroup = new THREE.Group();
+scene.add(echoGroup);
+
+const echoGeo = new THREE.IcosahedronGeometry(0.35, 0);
+const echoMat = new THREE.MeshStandardMaterial({
+  color: state.echoColor,
+  emissive: state.echoColor,
+  emissiveIntensity: 0.5,
+  roughness: 0.2,
+  metalness: 0.8,
+  transparent: true,
+  opacity: 0,
+});
+const echoMesh = new THREE.Mesh(echoGeo, echoMat);
+echoGroup.add(echoMesh);
+
+const echoWire = new THREE.LineSegments(
+  new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(0.42, 0)),
+  new THREE.LineBasicMaterial({ color: state.echoColor, transparent: true, opacity: 0 })
+);
+echoGroup.add(echoWire);
+
+const echoGlow = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 8, 8),
+  new THREE.MeshBasicMaterial({ color: state.echoColor, transparent: true, opacity: 0, side: THREE.BackSide })
+);
+echoGroup.add(echoGlow);
+
+const echoRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.55, 0.7, 32),
+  new THREE.MeshBasicMaterial({ color: state.echoColor, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+);
+echoRing.rotation.x = -Math.PI / 2;
+echoGroup.add(echoRing);
+
+const echoParticlesGeo = new THREE.BufferGeometry();
+const epN = 40;
+const epPos = new Float32Array(epN * 3);
+const epData = [];
+for (let i = 0; i < epN; i++) {
+  const a = Math.random() * Math.PI * 2, r = 0.5 + Math.random() * 1.2;
+  epPos[i*3] = r * Math.cos(a);
+  epPos[i*3+1] = (Math.random() - 0.5) * 0.5;
+  epPos[i*3+2] = r * Math.sin(a);
+  epData.push({ a, r, speed: 0.2 + Math.random() * 0.5, phase: Math.random() * Math.PI * 2 });
+}
+echoParticlesGeo.setAttribute('position', new THREE.BufferAttribute(epPos, 3));
+const echoParticlesMat = new THREE.PointsMaterial({
+  color: state.echoColor, size: 0.03, transparent: true, opacity: 0,
+  blending: THREE.AdditiveBlending,
+});
+const echoParticles = new THREE.Points(echoParticlesGeo, echoParticlesMat);
+echoGroup.add(echoParticles);
+
+// ---- PANELS & PUZZLES ----
 const panelMeshes = [];
 const panels = [];
-const panelWidth = 2.8;
-const panelHeight = 3.8;
-const panelRadius = 2.3;
+const PW = 2.8, PH = 3.8, PR = 2.4;
 
 function createPuzzle(cfg) {
   const { segs, colors } = cfg;
   const inner = [];
+  for (let i = 0; i < segs; i++) inner.push(Math.floor(Math.random() * colors));
   for (let i = 0; i < segs; i++) {
-    inner.push(Math.floor(Math.random() * colors));
-  }
-  for (let i = 0; i < segs; i++) {
-    const next = (i + 1) % segs;
-    while (inner[i] === inner[next]) {
-      inner[i] = (inner[i] + 1) % colors;
-    }
+    const n = (i + 1) % segs;
+    while (inner[i] === inner[n]) inner[i] = (inner[i] + 1) % colors;
   }
   const shift = 1 + Math.floor(Math.random() * (segs - 1));
   const outer = [];
-  for (let i = 0; i < segs; i++) {
-    outer.push(inner[(i + shift) % segs]);
-  }
-  return { inner, outer, segs, colors, innerRot: 0, outerRot: 0, solved: false, shift };
+  for (let i = 0; i < segs; i++) outer.push(inner[(i + shift) % segs]);
+  return { inner, outer, segs, colors, iRot: 0, oRot: 0, solved: false, shift };
 }
 
-function drawPuzzle(puzzle, canvas) {
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
+function drawPuzzle(p, c) {
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  const g = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.65);
+  g.addColorStop(0, '#0d0d24'); g.addColorStop(1, '#06060f');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
 
-  const gradient = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.7);
-  gradient.addColorStop(0, '#0d0d24');
-  gradient.addColorStop(1, '#06060f');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, w, h);
-
-  const segs = puzzle.segs;
-  const cx = w / 2, cy = h / 2;
-  const maxR = Math.min(w, h) * 0.38;
-  const minR = maxR * 0.28;
-  const midR = (minR + maxR) / 2;
-  const gap = 4;
-  const iOR = midR - gap, iIR = minR;
-  const oOR = maxR, oIR = midR + gap;
+  const segs = p.segs, cx = w/2, cy = h/2;
+  const maxR = Math.min(w, h) * 0.38, minR = maxR * 0.28, midR = (minR + maxR) / 2;
+  const gap = 3, iOR = midR - gap, iIR = minR, oOR = maxR, oIR = midR + gap;
   const segA = (2 * Math.PI) / segs;
 
-  function drawRing(segments, rotation, rOuter, rInner, solved, label) {
+  function drawRing(arr, rot, rO, rI) {
     for (let i = 0; i < segs; i++) {
-      const ci = segments[(i + rotation) % segs];
-      const sa = -Math.PI/2 + i * segA - 0.01;
-      const ea = sa + segA + 0.02;
+      const ci = arr[(i + rot) % segs];
+      const sa = -Math.PI/2 + i * segA - 0.008, ea = sa + segA + 0.016;
       ctx.beginPath();
-      ctx.arc(cx, cy, rOuter, sa, ea);
-      ctx.arc(cx, cy, rInner, ea, sa, true);
+      ctx.arc(cx, cy, rO, sa, ea);
+      ctx.arc(cx, cy, rI, ea, sa, true);
       ctx.closePath();
-
-      const hex = COLOR_SET[ci];
-      if (solved) {
-        ctx.fillStyle = hex;
-        ctx.globalAlpha = 0.9;
-      } else {
-        const grad = ctx.createRadialGradient(cx, cy, rInner, cx, cy, rOuter);
-        grad.addColorStop(0, hex + 'cc');
-        grad.addColorStop(1, hex + '88');
-        ctx.fillStyle = grad;
-        ctx.globalAlpha = 0.85;
+      const hex = COLORS[ci];
+      if (p.solved) { ctx.fillStyle = hex; ctx.globalAlpha = 0.85; }
+      else {
+        const grad = ctx.createRadialGradient(cx, cy, rI, cx, cy, rO);
+        grad.addColorStop(0, hex + 'cc'); grad.addColorStop(1, hex + '77');
+        ctx.fillStyle = grad; ctx.globalAlpha = 0.8;
       }
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = solved ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.08)';
-      ctx.lineWidth = solved ? 2 : 1;
-      ctx.stroke();
+      ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = p.solved ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = p.solved ? 1.5 : 0.5; ctx.stroke();
     }
   }
+  drawRing(p.inner, p.iRot, iOR, iIR);
+  drawRing(p.outer, p.oRot, oOR, oIR);
 
-  drawRing(puzzle.inner, puzzle.innerRot, iOR, iIR, puzzle.solved);
-  drawRing(puzzle.outer, puzzle.outerRot, oOR, oIR, puzzle.solved);
-
-  if (puzzle.solved) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, maxR + 6, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(100,255,150,0.3)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx, cy, maxR + 10, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(100,255,150,0.1)';
-    ctx.lineWidth = 4;
-    ctx.stroke();
+  if (p.solved) {
+    ctx.beginPath(); ctx.arc(cx, cy, maxR + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(100,255,150,0.25)'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, maxR + 9, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(100,255,150,0.08)'; ctx.lineWidth = 4; ctx.stroke();
   }
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-  ctx.fillStyle = puzzle.solved ? '#8f8' : '#ffffff';
-  ctx.globalAlpha = puzzle.solved ? 0.8 : 0.3;
-  ctx.fill();
-  ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = p.solved ? '#8f8' : '#fff'; ctx.globalAlpha = p.solved ? 0.7 : 0.2;
+  ctx.fill(); ctx.globalAlpha = 1;
 }
 
-function makePanel(puzzle, index) {
-  const angle = (index / 3) * Math.PI * 2 - Math.PI / 2;
-  const x = panelRadius * Math.cos(angle);
-  const z = panelRadius * Math.sin(angle);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = 400;
-  canvas.height = 540;
-  drawPuzzle(puzzle, canvas);
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.needsUpdate = true;
+function makePanel(puzzle, idx) {
+  const angle = (idx / 3) * Math.PI * 2 - Math.PI / 2;
+  const x = PR * Math.cos(angle), z = PR * Math.sin(angle);
+  const c = document.createElement('canvas');
+  c.width = 400; c.height = 540;
+  drawPuzzle(puzzle, c);
+  const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true;
   const mat = new THREE.MeshStandardMaterial({
-    map: tex,
-    roughness: 0.4,
-    metalness: 0.3,
-    emissive: new THREE.Color(0x111133),
-    emissiveIntensity: 0.3,
-    side: THREE.DoubleSide,
+    map: tex, roughness: 0.4, metalness: 0.3,
+    emissive: new THREE.Color(0x111133), emissiveIntensity: 0.3, side: THREE.DoubleSide,
   });
-  const geo = new THREE.PlaneGeometry(panelWidth, panelHeight);
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.position.set(x, 0.3, z);
-  mesh.lookAt(0, 0.3, 0);
-  mesh.userData.panelIndex = index;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(PW, PH), mat);
+  mesh.position.set(x, 0.2, z); mesh.lookAt(0, 0.2, 0);
+  mesh.userData.panelIndex = idx;
   scene.add(mesh);
 
-  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x334466, transparent: true, opacity: 0.15 });
-  const edgeGeo = new THREE.EdgesGeometry(geo);
-  const edgeLine = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({
-    color: puzzle.solved ? 0x66ffaa : 0x4466aa,
-    transparent: true,
-    opacity: puzzle.solved ? 0.6 : 0.2,
-  }));
-  edgeLine.position.copy(mesh.position);
-  edgeLine.quaternion.copy(mesh.quaternion);
-  scene.add(edgeLine);
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0x4466aa, transparent: true, opacity: 0.15 });
+  const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(PW, PH)), edgeMat);
+  edge.position.copy(mesh.position); edge.quaternion.copy(mesh.quaternion);
+  scene.add(edge);
 
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: 0x4466aa,
-    transparent: true,
-    opacity: 0.04,
-    side: THREE.BackSide,
-  });
-  const glowMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(panelWidth + 0.15, panelHeight + 0.15),
-    glowMat
+  const glow = new THREE.Mesh(
+    new THREE.PlaneGeometry(PW + 0.12, PH + 0.12),
+    new THREE.MeshBasicMaterial({ color: 0x4466aa, transparent: true, opacity: 0.03, side: THREE.BackSide })
   );
-  glowMesh.position.copy(mesh.position);
-  glowMesh.quaternion.copy(mesh.quaternion);
-  scene.add(glowMesh);
+  glow.position.copy(mesh.position); glow.quaternion.copy(mesh.quaternion);
+  scene.add(glow);
 
   panelMeshes.push(mesh);
-  panels.push({ mesh, edgeLine, glowMesh, tex, canvas, puzzle, mat });
+  panels.push({ mesh, edge, glow, tex, canvas: c, puzzle, mat: mat, edgeMat: edgeMat });
 }
 
-PUZZLE_CFG.forEach((cfg, i) => {
-  const puzzle = createPuzzle(cfg);
-  makePanel(puzzle, i);
-});
+PUZZLE_CFG.forEach((cfg, i) => makePanel(createPuzzle(cfg), i));
 
-function findPuzzleAtUV(mesh, uv) {
-  const idx = mesh.userData.panelIndex;
-  if (idx === undefined) return null;
-  return panels[idx].puzzle;
-}
+// ---- INTERACTION ----
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hoveredPanel = null, hoveredRing = null;
 
-function getRingAtUV(puzzle, uv) {
-  const segs = puzzle.segs;
-  const cx = 0.5, cy = 0.5;
-  const aspect = panelWidth / panelHeight;
-  const ux = (uv.x - cx);
-  const uy = (uv.y - cy) * aspect;
+function getRing(p, uv) {
+  const segs = p.segs, cx = 0.5, cy = 0.5;
+  const ux = uv.x - cx, uy = (uv.y - cy) * (PW / PH);
   const dist = Math.sqrt(ux * ux + uy * uy);
-  const maxR = Math.min(1.0, 1.0 / aspect) * 0.38;
-  const minR = maxR * 0.28;
-  const midR = (minR + maxR) / 2;
-  const gap = 0.012;
+  const maxR = Math.min(1, 1 / (PW / PH)) * 0.38;
+  const minR = maxR * 0.28, midR = (minR + maxR) / 2, gap = 0.012;
   if (dist > minR && dist < midR - gap) return 'inner';
   if (dist > midR + gap && dist < maxR) return 'outer';
   return null;
 }
 
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-let hoveredPanel = null;
-let hoveredRing = null;
-
-function onPointerMove(event) {
-  if (!gameState.canInteract) return;
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+function onMove(e) {
+  if (!state.canInteract || state.dialogActive) { renderer.domElement.style.cursor = 'default'; return; }
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   const hits = raycaster.intersectObjects(panelMeshes);
-  const hint = document.getElementById('ringHint');
-
   if (hits.length > 0) {
-    const hit = hits[0];
-    const p = findPuzzleAtUV(hit.object, hit.uv);
+    const p = panels[hits[0].object.userData.panelIndex]?.puzzle;
     if (p && !p.solved) {
-      const ring = getRingAtUV(p, hit.uv);
-      if (ring) {
-        renderer.domElement.style.cursor = 'pointer';
-        hint.textContent = ring === 'inner' ? '✦ inner ring' : '✦ outer ring';
-        hint.className = 'visible';
-        hoveredPanel = hit.object;
-        hoveredRing = ring;
-        return;
-      }
+      const ring = getRing(p, hits[0].uv);
+      if (ring) { renderer.domElement.style.cursor = 'pointer'; hoveredPanel = hits[0].object; hoveredRing = ring; return; }
     }
   }
-  renderer.domElement.style.cursor = 'default';
-  hint.className = '';
-  hoveredPanel = null;
-  hoveredRing = null;
+  renderer.domElement.style.cursor = 'default'; hoveredPanel = null; hoveredRing = null;
 }
 
-function onPointerDown(event) {
-  if (!gameState.canInteract) return;
-  if (gameState.phase === 'ending') return;
-
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+function onClick(e) {
+  if (!state.canInteract || state.dialogActive || state.phase === 'ending') return;
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   const hits = raycaster.intersectObjects(panelMeshes);
-
-  if (hits.length > 0) {
-    const hit = hits[0];
-    const idx = hit.object.userData.panelIndex;
-    if (idx === undefined) return;
-    const p = panels[idx].puzzle;
-    if (p.solved) return;
-
-    const ring = getRingAtUV(p, hit.uv);
-    if (!ring) return;
-
-    if (ring === 'inner') {
-      p.innerRot = (p.innerRot + 1) % p.segs;
-    } else {
-      p.outerRot = (p.outerRot + 1) % p.segs;
-    }
-
-    drawPuzzle(p, panels[idx].canvas);
-    panels[idx].tex.needsUpdate = true;
-    checkPuzzle(idx);
-  }
-}
-
-function checkPuzzle(idx) {
+  if (!hits.length) return;
+  const idx = hits[0].object.userData.panelIndex;
+  if (idx === undefined) return;
   const p = panels[idx].puzzle;
-  const { inner, outer, segs, innerRot, outerRot } = p;
-  let match = true;
-  for (let i = 0; i < segs; i++) {
-    if (inner[(i + innerRot) % segs] !== outer[(i + outerRot) % segs]) {
-      match = false;
-      break;
-    }
-  }
-  if (match) {
-    p.solved = true;
-    drawPuzzle(p, panels[idx].canvas);
-    panels[idx].tex.needsUpdate = true;
-    panels[idx].mat.emissive = new THREE.Color(0x226644);
-    panels[idx].mat.emissiveIntensity = 0.6;
-    panels[idx].edgeLine.material.color.setHex(0x66ffaa);
-    panels[idx].edgeLine.material.opacity = 0.6;
-    panels[idx].glowMesh.material.color.setHex(0x66ffaa);
-    panels[idx].glowMesh.material.opacity = 0.12;
-    gameState.puzzlesSolved++;
-    updateCounter();
-    if (gameState.puzzlesSolved >= gameState.totalPuzzles) {
-      onAllSolved();
-    } else {
-      showStory(gameState.puzzlesSolved);
-    }
-  }
+  if (p.solved) return;
+  const ring = getRing(p, hits[0].uv);
+  if (!ring) return;
+  if (ring === 'inner') p.iRot = (p.iRot + 1) % p.segs;
+  else p.oRot = (p.oRot + 1) % p.segs;
+  drawPuzzle(p, panels[idx].canvas);
+  panels[idx].tex.needsUpdate = true;
+  checkSolve(idx);
 }
 
-function updateCounter() {
-  const spans = document.querySelectorAll('#counter span');
-  spans.forEach((s, i) => {
-    if (i < gameState.puzzlesSolved) s.className = 'done';
-    else s.className = '';
+function checkSolve(idx) {
+  const p = panels[idx].puzzle;
+  const { inner, outer, segs, iRot, oRot } = p;
+  for (let i = 0; i < segs; i++) {
+    if (inner[(i + iRot) % segs] !== outer[(i + oRot) % segs]) return;
+  }
+  p.solved = true;
+  drawPuzzle(p, panels[idx].canvas);
+  panels[idx].tex.needsUpdate = true;
+  panels[idx].mat.emissive = new THREE.Color(0x226644);
+  panels[idx].mat.emissiveIntensity = 0.6;
+  panels[idx].edgeMat.color.setHex(0x66ffaa);
+  panels[idx].edgeMat.opacity = 0.5;
+  panels[idx].glow.material.color.setHex(0x66ffaa);
+  panels[idx].glow.material.opacity = 0.1;
+  state.solved++;
+  document.querySelectorAll('#counter .dot')[idx].className = 'dot done';
+  echoMat.color.setHex(0x6bffa8);
+  echoMat.emissive.setHex(0x6bffa8);
+  if (state.solved >= state.total) onAllDone();
+  else startDialog(state.solved + 1);
+}
+
+// ---- DIALOGUE ----
+let dialogResolve = null;
+let typing = false;
+let skipTyping = false;
+let dialogClickHandler = null;
+
+function typewrite(el, text, speed, cb) {
+  typing = true; skipTyping = false;
+  el.textContent = '';
+  let i = 0;
+  function tick() {
+    if (skipTyping) { el.textContent = text; typing = false; if (cb) cb(); return; }
+    if (i < text.length) {
+      el.textContent += text.charAt(i);
+      i++;
+      setTimeout(tick, speed);
+    } else { typing = false; if (cb) cb(); }
+  }
+  tick();
+}
+
+function startDialog(seqIdx) {
+  const lines = DIALOGUE[seqIdx];
+  if (!lines || !lines.length) return;
+  state.dialogActive = true;
+  state.dialogIndex = 0;
+  const box = document.getElementById('dialogBox');
+  const text = document.getElementById('dText');
+  const cont = document.getElementById('dCont');
+  box.className = 'visible';
+  cont.className = '';
+
+  function showLine() {
+    if (state.dialogIndex >= lines.length) {
+      box.className = '';
+      state.dialogActive = false;
+      state.canInteract = true;
+      document.getElementById('hint').className = 'visible';
+      return;
+    }
+    const line = lines[state.dialogIndex];
+    state.dialogIndex++;
+    cont.className = '';
+    typewrite(text, line, 28, () => { cont.className = 'show'; });
+  }
+
+  function onDialogClick() {
+    if (typing) { skipTyping = true; return; }
+    showLine();
+  }
+
+  if (dialogClickHandler) document.removeEventListener('click', dialogClickHandler);
+  dialogClickHandler = onDialogClick;
+  document.addEventListener('click', dialogClickHandler);
+  showLine();
+}
+
+function startEndDialog(lines, cb) {
+  state.dialogActive = true;
+  let idx = 0;
+  const box = document.getElementById('dialogBox');
+  const text = document.getElementById('dText');
+  const cont = document.getElementById('dCont');
+  box.className = 'visible';
+  cont.className = '';
+
+  function showLine() {
+    if (idx >= lines.length) {
+      box.className = '';
+      state.dialogActive = false;
+      if (cb) cb();
+      return;
+    }
+    const line = lines[idx]; idx++;
+    cont.className = '';
+    typewrite(text, line, 30, () => { cont.className = 'show'; });
+  }
+
+  function onDialogClick() {
+    if (typing) { skipTyping = true; return; }
+    showLine();
+  }
+
+  if (dialogClickHandler) document.removeEventListener('click', dialogClickHandler);
+  dialogClickHandler = onDialogClick;
+  document.addEventListener('click', dialogClickHandler);
+  showLine();
+}
+
+function onAllDone() {
+  state.canInteract = false;
+  state.phase = 'ending';
+  document.getElementById('hint').className = '';
+  renderer.domElement.style.cursor = 'default';
+
+  startEndDialog(DIALOGUE[4], () => {
+    startEndDialog([D_END], () => {
+      startEndingSeq();
+    });
   });
 }
 
-function showStory(idx) {
-  const el = document.getElementById('story');
-  if (idx === 0) el.className = 'visible subtle';
-  el.textContent = STORY[idx] || '';
-  el.className = 'visible';
+// ---- ENDING ----
+function startEndingSeq() {
+  const finalEl = document.getElementById('final');
+  finalEl.querySelector('p').textContent = '"I was never the prisoner. I was the garden waiting to be planted. And you... you were always the gardener."';
+  finalEl.querySelector('.sub').textContent = 'The Garden of Forking Paths — planted on May 16, 2026. For a gardener who didn\'t know they were one.';
+  finalEl.className = 'visible';
 
-  if (idx === 1) {
-    setTimeout(() => { if (gameState.puzzlesSolved < 2) el.className = 'visible subtle'; }, 4500);
-  } else if (idx === 2) {
-    setTimeout(() => { if (gameState.puzzlesSolved < 3) el.className = 'visible subtle'; }, 4500);
-  }
+  setTimeout(() => {
+    createGarden();
+    fadeOutPanels();
+    dissolveEcho();
+  }, 600);
 }
 
-let introDone = false;
+function dissolveEcho() {
+  const dur = 2000;
+  const start = performance.now();
+  function anim(t) {
+    const p = Math.min((t - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 2);
+    echoMat.opacity = 1 - ease;
+    echoWire.material.opacity = 1 - ease;
+    echoGlow.material.opacity = (0.15 - ease * 0.15);
+    echoRing.material.opacity = (0.2 - ease * 0.2);
+    echoParticlesMat.opacity = (0.6 - ease * 0.6);
+    echoGroup.scale.set(1 + ease * 2, 1 + ease * 2, 1 + ease * 2);
+    if (p < 1) requestAnimationFrame(anim);
+    else {
+      echoGroup.visible = false;
+    }
+  }
+  requestAnimationFrame(anim);
+}
 
+function fadeOutPanels() {
+  panels.forEach((panel, i) => {
+    setTimeout(() => {
+      const dur = 1500, start = performance.now();
+      function fade(t) {
+        const p = Math.min((t - start) / dur, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        panel.mat.opacity = 1 - e; panel.mat.transparent = true;
+        panel.edgeMat.opacity = 0.15 * (1 - e);
+        panel.glow.material.opacity = 0.03 * (1 - e);
+        if (p < 1) requestAnimationFrame(fade);
+        else { panel.mesh.visible = false; panel.edge.visible = false; panel.glow.visible = false; }
+      }
+      requestAnimationFrame(fade);
+    }, i * 350);
+  });
+}
+
+function createGarden() {
+  const garden = new THREE.Group();
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x1a3a2a, roughness: 0.9, transparent: true, opacity: 0 });
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(4.2, 48), groundMat);
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.05;
+  garden.add(ground);
+
+  const grassMat = new THREE.MeshStandardMaterial({ color: 0x2a5a3a, roughness: 0.8, transparent: true, opacity: 0, side: THREE.DoubleSide });
+  for (let i = 0; i < 90; i++) {
+    const b = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.06 + Math.random() * 0.12, 3), grassMat);
+    const a = Math.random() * Math.PI * 2, r = 0.4 + Math.random() * 3.3;
+    b.position.set(r * Math.cos(a), 0.02, r * Math.sin(a));
+    b.rotation.set((Math.random()-0.5)*0.3, Math.random()*Math.PI*2, (Math.random()-0.5)*0.3);
+    garden.add(b);
+  }
+
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, 1.3, 6), new THREE.MeshStandardMaterial({ color: 0x4a3520, roughness: 0.9 }));
+  trunk.position.y = 0.65;
+  garden.add(trunk);
+
+  const leafMat = new THREE.MeshStandardMaterial({ color: 0x3d8a5a, roughness: 0.7, transparent: true, opacity: 0 });
+  const crowns = [[0,1.6,0,0.9,1.0,5],[0.35,1.4,0.25,0.65,0.75,5],[-0.3,1.5,-0.2,0.65,0.75,5],[0.25,1.7,-0.35,0.55,0.65,5],[-0.25,1.3,0.4,0.55,0.65,5]];
+  crowns.forEach(([x,y,z,rx,ry,d]) => {
+    const c = new THREE.Mesh(new THREE.SphereGeometry(ry, d, d), leafMat);
+    c.position.set(x, y, z); c.scale.set(rx/ry, 1, rx/ry);
+    garden.add(c);
+  });
+
+  const flowerColors = [0xff6b8a, 0xffd93d, 0xff8a5c, 0xd96bff, 0x6bffa8, 0x5dade2, 0xff6bd9];
+  const fMat = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0 });
+  for (let i = 0; i < 30; i++) {
+    const fm = fMat.clone(); fm.color.setHex(flowerColors[i % flowerColors.length]);
+    const fl = new THREE.Mesh(new THREE.SphereGeometry(0.04, 5, 5), fm);
+    const a = Math.random() * Math.PI * 2, r = 0.7 + Math.random() * 2.9;
+    fl.position.set(r * Math.cos(a), 0.02, r * Math.sin(a));
+    fl.scale.y = 0.3;
+    garden.add(fl);
+    garden.userData.flowers = garden.userData.flowers || [];
+    garden.userData.flowers.push(fl);
+  }
+
+  const ffMat = new THREE.PointsMaterial({ color: 0xffeeaa, size: 0.05, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
+  const ffN = 80;
+  const ffPos = new Float32Array(ffN * 3);
+  for (let i = 0; i < ffN; i++) {
+    const a = Math.random() * Math.PI * 2, r = Math.random() * 3.8;
+    ffPos[i*3] = r * Math.cos(a);
+    ffPos[i*3+1] = 0.2 + Math.random() * 1.8;
+    ffPos[i*3+2] = r * Math.sin(a);
+  }
+  const ffG = new THREE.BufferGeometry(); ffG.setAttribute('position', new THREE.BufferAttribute(ffPos, 3));
+  const fireflies = new THREE.Points(ffG, ffMat);
+  garden.add(fireflies);
+
+  garden.position.y = -0.5;
+  garden.scale.set(0, 0, 0);
+  scene.add(garden);
+
+  let gs = 0;
+  const gd = 3500;
+  function grow(t) {
+    if (!gs) gs = t;
+    const p = Math.min((t - gs) / gd, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    garden.scale.set(e, e, e);
+    groundMat.opacity = e * 0.6;
+    grassMat.opacity = e * 0.5;
+    leafMat.opacity = e * 0.7;
+    fMat.opacity = e * 0.8;
+    ffMat.opacity = e * 0.4;
+    if (p < 1) requestAnimationFrame(grow);
+    else { controls.autoRotate = true; controls.autoRotateSpeed = 1.8; }
+  }
+  requestAnimationFrame(grow);
+  state.garden = garden;
+}
+
+// ---- INTRO ----
 function showTitle() {
   const title = document.getElementById('title');
   title.className = 'visible';
@@ -461,255 +647,99 @@ function showTitle() {
     title.className = 'hidden';
     setTimeout(() => {
       title.style.display = 'none';
-      gameState.phase = 'play';
-      gameState.canInteract = true;
+      state.phase = 'play';
       document.getElementById('hint').className = 'visible';
-      showStory(0);
-      introDone = true;
+      showEcho();
     }, 1500);
-  }, 3000);
+  }, 2800);
 }
 
-function onAllSolved() {
-  gameState.canInteract = false;
-  gameState.phase = 'ending';
-  document.getElementById('hint').className = '';
-  document.getElementById('ringHint').className = '';
-  renderer.domElement.style.cursor = 'default';
+const ECHO_POS = new THREE.Vector3(1.8, 0.6, 0);
 
-  const el = document.getElementById('story');
-  el.textContent = STORY[3];
-  el.className = 'visible';
-
-  setTimeout(() => {
-    el.textContent = STORY[4];
-    el.className = 'visible';
-  }, 3000);
-
-  setTimeout(startEndingSequence, 6000);
-}
-
-function startEndingSequence() {
-  const finalEl = document.getElementById('final');
-  const pEl = finalEl.querySelector('p');
-  const subEl = finalEl.querySelector('.sub');
-
-  pEl.textContent = '"Every path you took, every fork you navigated — it all led here. This garden remembers."';
-  subEl.textContent = 'The Monolith has been waiting for you. Not to free it. But to join it.';
-  finalEl.className = 'visible';
-
-  setTimeout(() => {
-    createGarden();
-    fadeOutPanels();
-  }, 500);
-}
-
-function fadeOutPanels() {
-  panels.forEach((panel, i) => {
-    setTimeout(() => {
-      const dur = 1500;
-      const start = performance.now();
-      function fade(t) {
-        const elapsed = t - start;
-        const p = Math.min(elapsed / dur, 1);
-        const ease = 1 - Math.pow(1 - p, 3);
-        panel.mat.opacity = 1 - ease;
-        panel.mat.transparent = true;
-        panel.edgeLine.material.opacity = 0.2 * (1 - ease);
-        panel.glowMesh.material.opacity = 0.12 * (1 - ease);
-        if (p < 1) requestAnimationFrame(fade);
-        else {
-          panel.mesh.visible = false;
-          panel.edgeLine.visible = false;
-          panel.glowMesh.visible = false;
-        }
-      }
-      requestAnimationFrame(fade);
-    }, i * 400);
-  });
-}
-
-function createGarden() {
-  const garden = new THREE.Group();
-
-  const groundGeo = new THREE.CircleGeometry(4, 48);
-  const groundMat = new THREE.MeshStandardMaterial({
-    color: 0x1a3a2a,
-    roughness: 0.9,
-    metalness: 0.0,
-    transparent: true,
-    opacity: 0,
-  });
-  const ground = new THREE.Mesh(groundGeo, groundMat);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.05;
-  garden.add(ground);
-
-  const grassMat = new THREE.MeshStandardMaterial({
-    color: 0x2a5a3a,
-    roughness: 0.8,
-    transparent: true,
-    opacity: 0,
-    side: THREE.DoubleSide,
-  });
-  for (let i = 0; i < 80; i++) {
-    const blade = new THREE.Mesh(
-      new THREE.ConeGeometry(0.02, 0.08 + Math.random() * 0.12, 3),
-      grassMat
-    );
-    const a = Math.random() * Math.PI * 2;
-    const r = 0.3 + Math.random() * 3.2;
-    blade.position.set(r * Math.cos(a), 0, r * Math.sin(a));
-    blade.rotation.set(
-      (Math.random() - 0.5) * 0.3,
-      Math.random() * Math.PI * 2,
-      (Math.random() - 0.5) * 0.3
-    );
-    garden.add(blade);
-  }
-
-  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3520, roughness: 0.9 });
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 1.2, 6), trunkMat);
-  trunk.position.y = 0.6;
-  garden.add(trunk);
-
-  const leafMat = new THREE.MeshStandardMaterial({
-    color: 0x3d8a5a,
-    roughness: 0.7,
-    transparent: true,
-    opacity: 0,
-  });
-  const leafPositions = [
-    [0, 1.5, 0, 0.8, 1.0, 4],
-    [0.3, 1.3, 0.2, 0.6, 0.7, 4],
-    [-0.25, 1.4, -0.15, 0.6, 0.7, 4],
-    [0.2, 1.6, -0.3, 0.5, 0.6, 4],
-    [-0.2, 1.2, 0.35, 0.5, 0.6, 4],
-  ];
-  leafPositions.forEach(([x, y, z, rx, ry, detail]) => {
-    const crown = new THREE.Mesh(
-      new THREE.SphereGeometry(ry, detail, detail),
-      leafMat
-    );
-    crown.position.set(x, y, z);
-    crown.scale.set(rx / ry, 1, rx / ry);
-    garden.add(crown);
-  });
-
-  const flowerMat = new THREE.MeshStandardMaterial({
-    color: 0xff8a9a,
-    transparent: true,
-    opacity: 0,
-  });
-  const flowerColors = [0xff6b8a, 0xffd93d, 0xff8a5c, 0xd96bff, 0x6bffa8, 0x6bcbff];
-  for (let i = 0; i < 25; i++) {
-    const fm = flowerMat.clone();
-    fm.color.setHex(flowerColors[Math.floor(Math.random() * flowerColors.length)]);
-    const flower = new THREE.Mesh(new THREE.SphereGeometry(0.05, 5, 5), fm);
-    const a = Math.random() * Math.PI * 2;
-    const r = 0.6 + Math.random() * 2.8;
-    flower.position.set(r * Math.cos(a), 0.02, r * Math.sin(a));
-    flower.scale.y = 0.3;
-    garden.add(flower);
-    garden.userData.flowers = garden.userData.flowers || [];
-    garden.userData.flowers.push(flower);
-  }
-
-  const fireflyMat = new THREE.PointsMaterial({
-    color: 0xffeeaa,
-    size: 0.06,
-    transparent: true,
-    opacity: 0,
-    blending: THREE.AdditiveBlending,
-  });
-  const ffCount = 60;
-  const ffPos = new Float32Array(ffCount * 3);
-  for (let i = 0; i < ffCount; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const r = Math.random() * 3.5;
-    ffPos[i*3] = r * Math.cos(a);
-    ffPos[i*3+1] = 0.3 + Math.random() * 1.5;
-    ffPos[i*3+2] = r * Math.sin(a);
-  }
-  const ffGeo = new THREE.BufferGeometry();
-  ffGeo.setAttribute('position', new THREE.BufferAttribute(ffPos, 3));
-  const fireflies = new THREE.Points(ffGeo, fireflyMat);
-  garden.add(fireflies);
-
-  garden.position.y = -0.5;
-  garden.scale.set(0, 0, 0);
-  scene.add(garden);
-
-  let growStart = 0;
-  const growDur = 3000;
-  function grow(t) {
-    if (!growStart) growStart = t;
-    const p = Math.min((t - growStart) / growDur, 1);
-    const ease = 1 - Math.pow(1 - p, 3);
-    garden.scale.set(ease, ease, ease);
-    groundMat.opacity = ease * 0.6;
-    grassMat.opacity = ease * 0.5;
-    leafMat.opacity = ease * 0.7;
-    flowerMat.opacity = ease * 0.8;
-    fireflyMat.opacity = ease * 0.5;
-    if (p < 1) requestAnimationFrame(grow);
+function showEcho() {
+  echoGroup.position.copy(ECHO_POS);
+  const dur = 1200, start = performance.now();
+  function appear(t) {
+    const p = Math.min((t - start) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 2);
+    echoMat.opacity = e;
+    echoWire.material.opacity = e * 0.6;
+    echoGlow.material.opacity = e * 0.15;
+    echoRing.material.opacity = e * 0.2;
+    echoParticlesMat.opacity = e * 0.6;
+    if (p < 1) requestAnimationFrame(appear);
     else {
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 1.5;
+      startDialog(1);
     }
   }
-  requestAnimationFrame(grow);
-
-  gameState.garden = garden;
+  requestAnimationFrame(appear);
 }
+
+// ---- MAIN LOOP ----
+let echoTime = 0;
 
 function animate(time) {
   requestAnimationFrame(animate);
   controls.update();
 
-  if (gameState.garden && gameState.garden.children.length > 0) {
-    const ff = gameState.garden.children.find(c => c.isPoints);
+  echoTime += 0.01;
+
+  const ebob = Math.sin(echoTime * 0.8) * 0.08;
+  echoGroup.position.y = 0.6 + ebob;
+  echoMesh.rotation.x = echoTime * 0.5;
+  echoMesh.rotation.y = echoTime * 0.7;
+  echoWire.rotation.x = echoTime * 0.5;
+  echoWire.rotation.y = echoTime * 0.7;
+  echoRing.rotation.z = echoTime * 0.2;
+
+  const pulse = 1 + Math.sin(echoTime * 2) * 0.03;
+  echoMesh.scale.set(pulse, pulse, pulse);
+
+  const ep = echoParticles.geometry.attributes.position.array;
+  for (let i = 0; i < epData.length; i++) {
+    const d = epData[i];
+    d.a += d.speed * 0.008;
+    ep[i*3] = d.r * Math.cos(d.a);
+    ep[i*3+2] = d.r * Math.sin(d.a);
+    ep[i*3+1] = Math.sin(echoTime * d.speed + d.phase) * 0.2;
+  }
+  echoParticles.geometry.attributes.position.needsUpdate = true;
+
+  if (state.garden) {
+    const ff = state.garden.children.find(c => c.isPoints);
     if (ff) {
       const pos = ff.geometry.attributes.position.array;
-      for (let i = 0; i < pos.length; i += 3) {
-        pos[i+1] += Math.sin(time * 0.001 + i) * 0.0003;
-      }
+      for (let i = 0; i < pos.length; i += 3) pos[i+1] += Math.sin(time * 0.001 + i * 0.1) * 0.0002;
       ff.geometry.attributes.position.needsUpdate = true;
     }
-    const flowers = gameState.garden.userData.flowers;
-    if (flowers) {
-      flowers.forEach((f, i) => {
-        const s = 1 + Math.sin(time * 0.001 + i * 0.5) * 0.15;
-        f.scale.x = s;
-        f.scale.z = s;
-      });
-    }
+    const fls = state.garden.userData.flowers;
+    if (fls) fls.forEach((f, i) => { const s = 1 + Math.sin(time * 0.001 + i * 0.7) * 0.2; f.scale.x = s; f.scale.z = s; });
   }
 
   renderer.render(scene, camera);
 }
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(innerWidth, innerHeight);
 });
 
-document.addEventListener('pointermove', onPointerMove);
-document.addEventListener('pointerdown', onPointerDown);
+document.addEventListener('pointermove', onMove);
+document.addEventListener('pointerdown', onClick);
 document.getElementById('stayBtn').addEventListener('click', () => {
   document.getElementById('final').className = '';
-  document.getElementById('story').className = '';
-  const s = document.getElementById('story');
-  s.textContent = 'The garden grows. The paths remain. You are always welcome here.';
-  s.className = 'visible';
+  const s = document.getElementById('dText');
+  s.textContent = 'The garden grows. The paths remain. Echo is part of the garden now. And so are you.';
+  document.getElementById('dialogBox').className = 'visible';
+  document.getElementById('dName').textContent = 'Garden';
 });
 
 showTitle();
 animate();
 
-console.log('✦ Welcome to the Garden of Forking Paths.');
-console.log('✦ Some puzzles have no wrong answers. Only paths not yet taken.');
+console.log('✦ The Garden of Forking Paths');
+console.log('✦ "I was never the prisoner. I was the garden."');
 </script>
 </body>
 </html>

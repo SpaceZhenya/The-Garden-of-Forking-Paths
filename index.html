@@ -3,54 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blackwood — A Detective Mystery</title>
+<title>Blackwood — A Cozy Mystery</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { overflow: hidden; background: #0a0806; font-family: 'Georgia', serif; color: #c8b8a8; }
+body { overflow: hidden; background: #0a0608; font-family: 'Georgia', serif; color: #d4c8b8; }
 canvas { display: block; }
 
 #ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
-#locName { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); color: #b8a898; font-size: 13px; letter-spacing: 4px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 1s; }
-#locName.visible { opacity: 0.6; }
+#prologue { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0608; z-index: 50; display: flex; justify-content: center; align-items: center; pointer-events: all; }
+#prologue .slide { position: absolute; max-width: 580px; text-align: center; opacity: 0; transition: opacity 1.8s ease; padding: 20px; }
+#prologue .slide p { font-size: 18px; line-height: 1.8; color: #d4c8b8; font-style: italic; }
+#prologue .slide .sm { font-size: 13px; color: #8a7a6a; margin-top: 16px; font-style: normal; letter-spacing: 2px; font-family: 'Courier New', monospace; }
+#prologue .slide.visible { opacity: 1; }
+#prologue .slide.out { opacity: 0; transition: opacity 1.2s ease; }
+#prologue .click-hint { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); color: #5a4a3a; font-size: 11px; font-family: 'Courier New', monospace; letter-spacing: 2px; opacity: 0; transition: opacity 1s; pointer-events: none; }
+#prologue .click-hint.show { opacity: 0.4; }
+
+#title { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, rgba(20,14,10,0.95) 0%, rgba(10,6,8,0.98) 100%); z-index: 45; display: flex; justify-content: center; align-items: center; flex-direction: column; opacity: 0; transition: opacity 2s ease; pointer-events: none; }
+#title.visible { opacity: 1; pointer-events: all; }
+#title.hidden { opacity: 0; pointer-events: none; transition: opacity 1.5s ease; }
+#title h1 { color: #d4a060; font-size: 34px; letter-spacing: 14px; font-weight: 100; text-shadow: 0 0 80px rgba(200,140,60,0.1); }
+#title h2 { color: #7a6a5a; font-size: 11px; letter-spacing: 6px; font-weight: 100; margin-top: 16px; }
+#title .prompt { color: #5a4a3a; font-size: 12px; margin-top: 40px; letter-spacing: 2px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 2s ease 1s; }
+#title .prompt.show { opacity: 0.4; }
+
+#locName { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); color: #a89888; font-size: 12px; letter-spacing: 4px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 1.2s; text-shadow: 0 0 30px rgba(0,0,0,0.5); }
+#locName.visible { opacity: 0.5; }
 
 #inventory { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; }
-#inventory .slot { width: 42px; height: 42px; border: 1px solid rgba(180,160,140,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(10,8,6,0.6); opacity: 0.3; transition: all 0.4s; border-radius: 4px; }
-#inventory .slot.filled { opacity: 0.8; border-color: rgba(200,170,130,0.3); }
-#inventory .slot .hint { display: none; position: absolute; top: 50px; right: 0; background: rgba(10,8,6,0.9); border: 1px solid rgba(180,160,140,0.2); padding: 6px 10px; font-size: 11px; white-space: nowrap; font-family: 'Courier New', monospace; color: #a89888; border-radius: 3px; }
+#inventory .slot { width: 40px; height: 40px; border: 1px solid rgba(180,160,140,0.12); display: flex; align-items: center; justify-content: center; font-size: 16px; background: rgba(10,8,6,0.5); opacity: 0.2; transition: all 0.5s; border-radius: 6px; position: relative; }
+#inventory .slot.filled { opacity: 0.7; border-color: rgba(200,170,130,0.25); }
+#inventory .slot .hint { display: none; position: absolute; top: 46px; right: 0; background: rgba(10,8,6,0.92); border: 1px solid rgba(180,160,140,0.15); padding: 5px 9px; font-size: 10px; white-space: nowrap; font-family: 'Courier New', monospace; color: #a89888; border-radius: 4px; line-height: 1.4; width: 180px; white-space: normal; }
 #inventory .slot:hover .hint { display: block; }
 
-#dialogue { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: min(620px, 85%); background: linear-gradient(180deg, rgba(10,8,6,0) 0%, rgba(10,8,6,0.85) 25%, rgba(10,8,6,0.95) 100%); opacity: 0; transition: opacity 0.6s; pointer-events: all; padding: 24px 24px 16px; border-top: 1px solid rgba(180,160,140,0.08); }
+#dialogue { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: min(600px, 84%); background: linear-gradient(180deg, rgba(10,8,6,0) 0%, rgba(15,12,10,0.8) 20%, rgba(15,12,10,0.95) 100%); opacity: 0; transition: opacity 0.6s; pointer-events: all; padding: 22px 22px 14px; border-top: 1px solid rgba(200,170,130,0.06); border-radius: 8px; }
 #dialogue.visible { opacity: 1; }
-#dialogue .name { color: #b8a060; font-size: 12px; letter-spacing: 2px; font-family: 'Courier New', monospace; margin-bottom: 8px; }
-#dialogue .text { color: #d8c8b8; font-size: 16px; line-height: 1.8; min-height: 2.5em; }
-#dialogue .choices { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
-#dialogue .choices .btn { background: rgba(180,160,140,0.06); border: 1px solid rgba(180,160,140,0.12); padding: 10px 16px; color: #c8b8a8; font-size: 14px; cursor: pointer; pointer-events: all; text-align: left; transition: all 0.3s; font-family: 'Georgia', serif; border-radius: 3px; }
-#dialogue .choices .btn:hover { background: rgba(180,160,140,0.12); border-color: rgba(180,160,140,0.25); color: #e8d8c8; }
-#dialogue .cont { color: #5a4a3a; font-size: 11px; margin-top: 12px; opacity: 0; transition: opacity 0.3s; font-family: 'Courier New', monospace; letter-spacing: 1px; }
-#dialogue .cont.show { opacity: 0.5; cursor: pointer; }
+#dialogue .name { color: #c8a060; font-size: 12px; letter-spacing: 2px; font-family: 'Courier New', monospace; margin-bottom: 8px; }
+#dialogue .text { color: #d8c8b8; font-size: 15px; line-height: 1.8; min-height: 2.4em; }
+#dialogue .choices { margin-top: 14px; display: flex; flex-direction: column; gap: 5px; }
+#dialogue .choices .btn { background: rgba(180,160,140,0.05); border: 1px solid rgba(180,160,140,0.1); padding: 9px 14px; color: #d4c8b8; font-size: 13px; cursor: pointer; pointer-events: all; text-align: left; transition: all 0.3s; font-family: 'Georgia', serif; border-radius: 4px; }
+#dialogue .choices .btn:hover { background: rgba(200,170,130,0.08); border-color: rgba(200,170,130,0.2); color: #ece0d0; padding-left: 20px; }
+#dialogue .cont { color: #5a4a3a; font-size: 11px; margin-top: 10px; opacity: 0; transition: opacity 0.3s; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+#dialogue .cont.show { opacity: 0.4; cursor: pointer; }
 
-#travelBtn { position: absolute; bottom: 30px; right: 30px; padding: 10px 22px; background: rgba(10,8,6,0.85); border: 1px solid rgba(180,160,140,0.15); color: #b8a898; font-size: 12px; cursor: pointer; pointer-events: all; font-family: 'Courier New', monospace; letter-spacing: 2px; opacity: 0; transition: all 0.5s; }
-#travelBtn.visible { opacity: 0.7; }
-#travelBtn:hover { opacity: 1; border-color: rgba(200,170,130,0.3); }
+#travelBtn { position: absolute; bottom: 24px; right: 24px; padding: 9px 20px; background: rgba(15,12,10,0.85); border: 1px solid rgba(200,170,130,0.12); color: #c8b098; font-size: 11px; cursor: pointer; pointer-events: all; font-family: 'Courier New', monospace; letter-spacing: 2px; opacity: 0; transition: all 0.6s; border-radius: 4px; }
+#travelBtn.visible { opacity: 0.6; }
+#travelBtn:hover { opacity: 1; border-color: rgba(200,170,130,0.25); background: rgba(20,16,14,0.9); }
 
-#hint { position: absolute; bottom: 160px; left: 50%; transform: translateX(-50%); color: #4a3a2a; font-size: 11px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 1s; letter-spacing: 2px; text-align: center; }
-#hint.visible { opacity: 0.4; }
+#hint { position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%); color: #5a4a3a; font-size: 11px; font-family: 'Courier New', monospace; opacity: 0; transition: opacity 1.2s; letter-spacing: 2px; text-align: center; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+#hint.visible { opacity: 0.35; }
 
-#fade { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.8s; }
+#fade { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0608; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 1s; }
 
 #final { display: none; }
-#final.visible { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; background: radial-gradient(ellipse at center, rgba(10,8,6,0.97) 0%, rgba(0,0,0,0.99) 100%); z-index: 40; pointer-events: all; padding: 20px; }
-#final p { color: #d8c8b8; font-size: 18px; text-align: center; max-width: 560px; line-height: 1.9; font-style: italic; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 0.5s; }
-#final .sub { color: #7a6a5a; font-size: 12px; margin-top: 18px; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 4s; letter-spacing: 1px; font-family: 'Courier New', monospace; }
-#final .btn-wrap { opacity: 0; animation: fadeUp 1.5s ease forwards; animation-delay: 5.5s; margin-top: 20px; }
-#final .btn { padding: 10px 36px; border: 1px solid rgba(180,160,140,0.2); background: transparent; color: #b8a060; font-size: 12px; cursor: pointer; letter-spacing: 3px; font-family: 'Courier New', monospace; transition: all 0.3s; }
-#final .btn:hover { background: rgba(180,160,140,0.08); border-color: rgba(200,170,130,0.3); }
+#final.visible { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; flex-direction: column; background: radial-gradient(ellipse at center, rgba(15,12,10,0.96) 0%, rgba(10,6,8,0.99) 100%); z-index: 40; pointer-events: all; padding: 20px; }
+#final p { color: #d8c8b8; font-size: 17px; text-align: center; max-width: 540px; line-height: 1.9; font-style: italic; opacity: 0; animation: fadeUp 2.5s ease forwards; animation-delay: 0.5s; }
+#final .sub { color: #7a6a5a; font-size: 12px; margin-top: 16px; opacity: 0; animation: fadeUp 2s ease forwards; animation-delay: 4s; letter-spacing: 1px; font-family: 'Courier New', monospace; }
+#final .btn-wrap { opacity: 0; animation: fadeUp 1.8s ease forwards; animation-delay: 6s; margin-top: 18px; }
+#final .btn { padding: 8px 32px; border: 1px solid rgba(200,170,130,0.15); background: transparent; color: #c8a060; font-size: 12px; cursor: pointer; letter-spacing: 3px; font-family: 'Courier New', monospace; transition: all 0.3s; border-radius: 4px; }
+#final .btn:hover { background: rgba(200,170,130,0.06); border-color: rgba(200,170,130,0.25); }
 
-@keyframes fadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
+
+<div id="prologue">
+  <div class="slide" id="slide0"><p>"Three months ago, Lydia Miller walked out of her front door and vanished."</p></div>
+  <div class="slide" id="slide1"><p>"The town of Blackwood searched for a week. Then they stopped."</p><p class="sm">— It was autumn. The leaves were beginning to fall. —</p></div>
+  <div class="slide" id="slide2"><p>"But someone didn\u2019t stop. A letter arrived on my doorstep, written in a trembling hand:"</p></div>
+  <div class="slide" id="slide3"><p>"\u2018She\u2019s not missing. She\u2019s hidden.\u2019"</p><p class="sm">Signed only: E.M.</p></div>
+  <div class="slide" id="slide4"><p>"I\u2019m retired. Six years now. I spend my days reading, tending to the garden, watching the rain."</p><p class="sm">But some letters you can\u2019t ignore.</p></div>
+  <div class="slide" id="slide5"><p>"I packed a bag, drove through the night, and arrived in Blackwood just as the streetlamps were flickering on."</p><p class="sm">The town was quiet. Warm lights glowed in the windows. Somewhere, a dog barked. Somewhere, someone was waiting for me to find them.</p></div>
+  <div class="click-hint" id="proClick">▼ click to continue</div>
+</div>
+
+<div id="title">
+  <h1>BLACKWOOD</h1>
+  <h2>— A COZY MYSTERY —</h2>
+  <div class="prompt show" id="titlePrompt">click anywhere to begin</div>
+</div>
 
 <div id="fade"></div>
 
@@ -64,7 +97,7 @@ canvas { display: block; }
     <div class="cont" id="dCont">▼ continue</div>
   </div>
   <div id="travelBtn">→ TRAVEL TO MILLER HOUSE</div>
-  <div id="hint">click an NPC to investigate</div>
+  <div id="hint">click a character to talk to them</div>
 </div>
 
 <div id="final"><p></p><p class="sub"></p><div class="btn-wrap"><button class="btn" id="stayBtn">✦ CLOSE CASE</button></div></div>
@@ -84,768 +117,612 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // ─── DATA ───────────────────────────────────────────
 const NPC_DATA = [
-  {
-    id: 'mercer', name: 'Old Man Mercer', shape: 'octahedron', color: 0xd4a060,
-    pos: [-2.2, 0, -2.0], rotY: 0.7,
-    intro: 'Eh? Who\u2019s there at this hour? Oh\u2014a detective. Finally. Someone asking questions.',
-    questions: [
-      { q: 'What did you see the night Lydia disappeared?',
-        a: 'I couldn\u2019t sleep. Bad hip. Around midnight I saw her walking toward the old Miller house. Carrying a bag. Looked scared.' },
-      { q: 'Was Lydia acting strange before that?',
-        a: 'She was jumpy. Kept looking over her shoulder. But she wasn\u2019t crazy. Folks round here said she was. I disagree.' },
+  { id:'mercer', name:'Old Man Mercer', shape:'octahedron', color:0xd4a060, pos:[-2.2,0,-2.0], rotY:0.7,
+    intro:'Eh? Someone\u2019s asking questions at this hour? About time. Name\u2019s Mercer. Been here seventy years. Saw things most folks forgot.',
+    questions:[
+      { q:'What did you see the night Lydia disappeared?',
+        a:'I was on my porch. Couldn\u2019t sleep\u2014hip\u2019s been acting up. Around midnight, I saw her walk past. Headed toward the old Miller place. She was carrying a bag and kept looking back over her shoulder.' },
+      { q:'Was Lydia acting strange before that?',
+        a:'Strange? No. She was scared. There\u2019s a difference. Folks here said she was losing her mind. But fear ain\u2019t madness. It\u2019s just fear.' },
     ],
-    farewell: 'I hope you find answers, detective. Someone deserves the truth.',
-    item: { name: 'Rusty Key', icon: '\uD83D\uDDDD', desc: 'An old iron key. Might open something on the Miller property.',
-      give: 'Almost forgot\u2014I found this key by the fountain last week. Try it on the Miller house lock.' }
+    farewell:'You\u2019ve got a good face, detective. Honest. Don\u2019t let this town change that.',
+    item:{ name:'Rusty Key', icon:'\uD83D\uDDDD', desc:'An old iron key engraved with \u201cMiller\u201d. Found near the fountain.',
+      give:'Almost forgot. Found this key by the fountain last week. Has \u201cMiller\u201d on it. Might be worth a try.' }
   },
-  {
-    id: 'elara', name: 'Elara Voss', shape: 'sphere', color: 0x4ab0a0,
-    pos: [2.5, 0, -1.8], rotY: -0.5,
-    intro: 'Detective. I was wondering when someone would come. Lydia\u2019s been gone three months. No one seemed to care.',
-    questions: [
-      { q: 'What did Lydia buy before she vanished?',
-        a: 'Candles. Rope. Canned food. A lantern. I asked if she was going camping. She said yes. In winter. I knew she was lying.' },
-      { q: 'Did she mention anyone following her?',
-        a: 'She kept whispering about \u201cher.\u201d I asked who. She just said \u201cmy sister\u201d and went pale. Then she left.' },
+  { id:'elara', name:'Elara Voss', shape:'sphere', color:0x4ab0a0, pos:[2.5,0,-1.8], rotY:-0.5,
+    intro:'Detective. I was wondering when someone would come. I\u2019m Elara. I run the general store. Lydia was a regular.',
+    questions:[
+      { q:'What did she buy before she vanished?',
+        a:'Candles. Rope. Canned food. A lantern. She said she was going camping. In late autumn. I knew she was lying, but I didn\u2019t push.' },
+      { q:'Did she ever mention anyone following her?',
+        a:'She whispered about \u201cher.\u201d I asked who. She went pale and said \u201cmy sister.\u201d Then she grabbed her things and left.' },
     ],
-    farewell: 'Find her, detective. Whatever\u2019s left to find.',
-    item: { name: 'Newspaper Clipping', icon: '\uD83D\uDCF0', desc: 'A 20-year-old article about the Miller house fire. One casualty: a 7-year-old girl.',
-      give: 'Here. An old clipping about the Miller fire. I\u2019ve kept it twenty years. Something never sat right.' }
+    farewell:'I hope you find her, detective. She was a good person. Scared, but good.',
+    item:{ name:'Newspaper Clipping', icon:'\uD83D\uDCF0', desc:'A yellowed article: \u201cFire at Miller Home\u2014One Child Presumed Dead.\u201d',
+      give:'Here. I\u2019ve kept this for twenty years. The Miller fire. A little girl died that night. Or so they said.' }
   },
-  {
-    id: 'finch', name: 'Dr. Helena Finch', shape: 'icosahedron', color: 0x5a8ab0,
-    pos: [0.2, 0, 2.8], rotY: Math.PI,
-    intro: 'Ah, the detective. Lydia was my patient. I\u2019ve been worried sick. Please, sit down.',
-    questions: [
-      { q: 'What was Lydia being treated for?',
-        a: 'Severe anxiety. Night terrors. She claimed someone watched her through the walls. I prescribed sedatives. They barely helped.' },
-      { q: 'Did she have any family history?',
-        a: 'She was adopted after the Miller fire. Lately she\u2019d been researching twin genetics. I thought it was academic. Now I wonder.' },
+  { id:'finch', name:'Dr. Helena Finch', shape:'icosahedron', color:0x5a8ab0, pos:[0.2,0,2.8], rotY:Math.PI,
+    intro:'Ah, you must be the detective. Helena Finch. I was Lydia\u2019s physician. Please, have a seat.',
+    questions:[
+      { q:'What was Lydia being treated for?',
+        a:'Severe insomnia. Night terrors. She claimed someone watched her through the walls at night. I prescribed sedatives. They hardly touched it.' },
+      { q:'Did she have any family history?',
+        a:'She was adopted after the Miller fire. Lately she\u2019d been researching twin genetics. I thought it was academic curiosity. Now I wonder if she was searching for someone.' },
     ],
-    farewell: 'I broke confidentiality. I hope it was the right choice.',
-    item: { name: 'Medical Records', icon: '\uD83D\uDCCB', desc: 'Lydia\u2019s file. Notes on twin genetics research. A name underlined: Emily Miller.',
-      give: 'Her medical records. The last page\u2014she underlined a name. Emily Miller. Her sister. The one who died in the fire. Or so we thought.' }
+    farewell:'I\u2019ve broken patient confidentiality by speaking with you. I hope it was worth it.',
+    item:{ name:'Medical Records', icon:'\uD83D\uDCCB', desc:'Lydia\u2019s file. A name underlined repeatedly: Emily Miller. Date of death: disputed.',
+      give:'Her medical records. Look at the last page. She underlined a name: Emily Miller. Her twin sister. The one who supposedly died in the fire.' }
   },
 ];
 
-const LOCATIONS = {
-  square: { name: 'TOWN SQUARE \u2014 BLACKWOOD' },
-  house: { name: 'MILLER HOUSE \u2014 BASEMENT' },
-};
-
 const HOUSE_DIALOGUE = [
-  'The door groans open. Dust and silence pour out.',
-  'You step inside. The air is cold. A figure stands in the corner.',
-  '\u201cYou... you actually came. No one ever comes here.\u201d',
-  'She steps into the light. She has Lydia\u2019s face.',
-  '\u201cI\u2019m Emily. Lydia\u2019s twin. The one who died in the fire.\u201d',
+  'The door groans open. Warm, dusty air spills out.',
+  'You step inside. The floorboards whimper under your weight.',
+  'A faint candle flickers in the corner. A figure sits beside it.',
+  'She looks up. She has Lydia\u2019s face. The same eyes. The same tired smile.',
+  '\u201cYou came. No one ever comes here.\u201d Her voice is soft, like she hasn\u2019t used it in years.',
+  '\u201cI\u2019m Emily. I\u2019m Lydia\u2019s twin. The one who died in the fire.\u201d',
   '\u201cI didn\u2019t die. I escaped. I\u2019ve been hiding in this basement for twenty years.\u201d',
   '\u201cLydia found me six months ago. She was going to tell the town. She was going to save me.\u201d',
-  '\u201cBut the mayor found out first. The fire was his fault\u2014bad wiring in the building he owned.\u201d',
+  '\u201cBut the mayor found out. The fire was his fault\u2014bad wiring in the building he owned.\u201d',
   '\u201cHe covered it up. And when Lydia threatened to expose him, he had her committed.\u201d',
-  '\u201cShe\u2019s not missing, detective. She\u2019s locked away in Cedarbrook Asylum. And no one believes me.\u201d',
-  'She looks at you with Lydia\u2019s eyes. \u201cWill you help me?\u201d',
+  '\u201cShe\u2019s not missing, detective. She\u2019s in Cedarbrook Asylum. And no one believes me.\u201d',
+  'She holds the candle closer. Her eyes glisten. \u201cWill you help me?\u201d',
 ];
 
 const ENDINGS = {
   expose: {
-    line: '"I believe you, Emily. Let\u2019s end this."',
-    story: 'You found the evidence. You found your voice. The mayor was arrested that night. Emily walked free for the first time in twenty years. The truth didn\u2019t set her free\u2014you did.',
-    final: 'The garden grew where the house once stood. Two sisters, together again, planting flowers in the ashes.',
+    line:'"I believe you, Emily. Let\u2019s go."',
+    story:'You found the evidence. You found the truth. The mayor was arrested the following morning. Emily walked out of that basement for the first time in twenty years. The town gathered in the square, silent, ashamed. And then someone started clapping. And then everyone did.',
+    final:'The garden at Miller House is overgrown now. But every spring, someone leaves fresh flowers on the doorstep. No one knows who. But everyone knows why.',
   },
   escape: {
-    line: '"I believe you. But I can\u2019t fight the mayor. Go. Disappear."',
-    story: 'You gave her your coat and your silence. She left that night. A letter arrived a week later, postmarked from a city you\u2019d never heard of. "Thank you for listening. That\u2019s all I ever needed."',
-    final: 'Some cases don\u2019t end in courtrooms. They end in quiet goodbyes. You closed the file, but you never closed the door on her.',
+    line:'"I believe you. But I can\u2019t fight him. Go. Now."',
+    story:'You gave her your coat, your scarf, and the last of your courage. She disappeared into the woods that night. A week later, a postcard arrived. No return address. Just two words: "Thank you."',
+    final:'Some cases end with handcuffs. Some end with a postcard taped above your desk. You never forgot her eyes. You never stopped hoping she made it.',
   },
 };
 
-// ─── STATE ───────────────────────────────────────────
 const S = {
-  location: 'square', phase: 'intro', npcIdx: -1, qIdx: 0,
-  inventory: [],
-  npc: NPC_DATA.map(() => ({ talkedTo: false, asked: [], itemGiven: false })),
-  houseStep: 0,
-  ending: null,
-  canInteract: false,
-  dialogOpen: false,
+  location:'square', phase:'intro', npcIdx:-1,
+  inventory:[],
+  npc: NPC_DATA.map(() => ({ talkedTo:false, asked:[], itemGiven:false })),
+  houseStep:0, ending:null,
+  canInteract:false, dialogOpen:false,
 };
 
-// ─── THREE.JS SETUP ─────────────────────────────────
+// ─── THREE.JS ───────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0810);
-scene.fog = new THREE.Fog(0x0a0810, 12, 22);
+scene.background = new THREE.Color(0x12101a);
+scene.fog = new THREE.Fog(0x12101a, 12, 22);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 40);
-camera.position.set(4, 3, 6);
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 40);
+camera.position.set(4.5, 2.8, 5.5);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.8;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMappingExposure = 0.9;
 document.body.prepend(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0.2, 0);
-controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.minDistance = 3;
-controls.maxDistance = 14;
-controls.maxPolarAngle = Math.PI / 2.05;
+controls.target.set(0,0.2,0);
+controls.enableDamping = true; controls.dampingFactor = 0.05;
+controls.minDistance = 3.5; controls.maxDistance = 13;
+controls.maxPolarAngle = Math.PI/2.05;
 controls.update();
 
-const ambient = new THREE.AmbientLight(0x1a1a2a, 0.3);
+const ambient = new THREE.AmbientLight(0x1a1a2a, 0.25);
 scene.add(ambient);
-const moon = new THREE.DirectionalLight(0x8888cc, 0.3);
+
+const moon = new THREE.DirectionalLight(0x9988bb, 0.2);
 moon.position.set(-5, 10, -5);
 scene.add(moon);
 
+function addWarmLights() {
+  const positions = [[-3,0,-2],[3,0,-1.5],[-2.5,0,3.5],[3.5,0,3],[0,0,0.5]];
+  positions.forEach(([x,_,z]) => {
+    const pl = new THREE.PointLight(0xffcc88, 0.5, 4);
+    pl.position.set(x, 1.8, z);
+    scene.add(pl);
+  });
+}
+addWarmLights();
+
+// ─── NPCs ────────────────────────────────────────────
 const npcMeshes = [];
 const npcGroups = [];
 
-function createNPCMesh(data) {
+function createNPC(data) {
   const group = new THREE.Group();
-  let geo;
-  if (data.shape === 'octahedron') geo = new THREE.OctahedronGeometry(0.35, 0);
-  else if (data.shape === 'sphere') geo = new THREE.SphereGeometry(0.33, 8, 8);
-  else geo = new THREE.IcosahedronGeometry(0.33, 0);
-
-  const mat = new THREE.MeshStandardMaterial({
-    color: data.color, emissive: data.color, emissiveIntensity: 0.2,
-    roughness: 0.3, metalness: 0.7, transparent: true, opacity: 0,
-  });
+  let geo = data.shape==='octahedron' ? new THREE.OctahedronGeometry(0.32,0)
+          : data.shape==='sphere' ? new THREE.SphereGeometry(0.3,8,8)
+          : new THREE.IcosahedronGeometry(0.3,0);
+  const mat = new THREE.MeshStandardMaterial({ color:data.color, emissive:data.color,
+    emissiveIntensity:0.15, roughness:0.3, metalness:0.7, transparent:true, opacity:0 });
   const mesh = new THREE.Mesh(geo, mat);
   group.add(mesh);
 
-  const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.45, 8, 8),
-    new THREE.MeshBasicMaterial({ color: data.color, transparent: true, opacity: 0, side: THREE.BackSide })
-  );
+  const glow = new THREE.Mesh(new THREE.SphereGeometry(0.42,8,8),
+    new THREE.MeshBasicMaterial({ color:data.color, transparent:true, opacity:0, side:THREE.BackSide }));
   group.add(glow);
 
-  const labelCanvas = document.createElement('canvas');
-  labelCanvas.width = 300; labelCanvas.height = 60;
-  const ctx = labelCanvas.getContext('2d');
-  ctx.fillStyle = 'rgba(6,4,3,0.7)';
-  ctx.beginPath(); ctx.roundRect(10, 8, 280, 44, 6); ctx.fill();
-  ctx.strokeStyle = 'rgba(180,160,140,0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(10, 8, 280, 44, 6); ctx.stroke();
-  ctx.fillStyle = '#c8b8a8'; ctx.font = '18px "Georgia"'; ctx.textAlign = 'center';
-  ctx.fillText(data.name, 150, 40);
-  const labelTex = new THREE.CanvasTexture(labelCanvas);
-  const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, opacity: 0, depthTest: false, sizeAttenuation: true });
-  const label = new THREE.Sprite(labelMat);
-  label.scale.set(1.6, 0.32, 1);
-  label.position.y = 0.9;
-  group.add(label);
+  const lbl = (()=>{
+    const c = document.createElement('canvas'); c.width=300; c.height=60;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='rgba(10,8,6,0.75)'; ctx.beginPath(); ctx.roundRect(10,8,280,44,8); ctx.fill();
+    ctx.strokeStyle='rgba(200,180,160,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(10,8,280,44,8); ctx.stroke();
+    ctx.fillStyle='#d4c8b8'; ctx.font='17px "Georgia"'; ctx.textAlign='center';
+    ctx.fillText(data.name,150,40);
+    const t=new THREE.CanvasTexture(c);
+    const m=new THREE.SpriteMaterial({ map:t, transparent:true, opacity:0, depthTest:false, sizeAttenuation:true });
+    const s=new THREE.Sprite(m); s.scale.set(1.5,0.3,1); s.position.y=0.85;
+    return s;
+  })();
+  group.add(lbl);
 
-  const [x, y, z] = data.pos;
-  group.position.set(x, y, z);
-  group.userData.npcIdx = NPC_DATA.indexOf(data);
-  scene.add(group);
-  npcGroups.push(group);
-  npcMeshes.push(mesh);
-  return { group, mesh, mat, glow, label, labelMat };
+  const [x,y,z]=data.pos;
+  group.position.set(x,y,z); group.userData.npcIdx=NPC_DATA.indexOf(data);
+  scene.add(group); npcGroups.push(group); npcMeshes.push(mesh);
+  return { group,mesh,mat,glow,labelMesh:lbl };
 }
+const npcObjs = NPC_DATA.map(d=>createNPC(d));
 
-const npcObjects = NPC_DATA.map(d => createNPCMesh(d));
+// ─── TOWN ────────────────────────────────────────────
+const leaves = (() => {
+  const n = 300; const pos = new Float32Array(n*3); const vel = []; const sizes = new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, r=Math.random()*6;
+    pos[i*3]=r*Math.cos(a); pos[i*3+1]=2+Math.random()*6; pos[i*3+2]=r*Math.sin(a);
+    vel.push({x:(Math.random()-0.5)*0.003, z:(Math.random()-0.5)*0.003, rot:Math.random()*Math.PI*2, rs:0.5+Math.random()*1.5});
+    sizes[i]=0.02+Math.random()*0.03;
+  }
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  g.setAttribute('size',new THREE.BufferAttribute(sizes,1));
+  const m=new THREE.PointsMaterial({ color:0xcc8844, size:0.04, transparent:true, opacity:0.3,
+    blending:THREE.AdditiveBlending, sizeAttenuation:true });
+  const p=new THREE.Points(g,m); scene.add(p);
+  return {points:p, pos, vel};
+})();
 
-function createTown() {
-  const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(10, 64),
-    new THREE.MeshStandardMaterial({ color: 0x1a1512, roughness: 0.9 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
+function buildTown() {
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(10,64),
+    new THREE.MeshStandardMaterial({ color:0x1a1612, roughness:0.95 }));
+  ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 
-  const cobble = new THREE.Mesh(
-    new THREE.CircleGeometry(4.5, 32),
-    new THREE.MeshStandardMaterial({ color: 0x221d18, roughness: 0.95 })
-  );
-  cobble.rotation.x = -Math.PI / 2;
-  cobble.position.y = 0.01;
-  scene.add(cobble);
+  const cobble = new THREE.Mesh(new THREE.CircleGeometry(4.8,32),
+    new THREE.MeshStandardMaterial({ color:0x221d18, roughness:0.95 }));
+  cobble.rotation.x=-Math.PI/2; cobble.position.y=0.008; scene.add(cobble);
 
-  function bldg(x, z, w, h, d, color) {
-    const g = new THREE.Group();
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color, roughness: 0.85 }));
-    wall.position.set(x, h/2, z); wall.castShadow = true;
-    g.add(wall);
-    const roof = new THREE.Mesh(new THREE.ConeGeometry(w * 0.75, h * 0.35, 4), new THREE.MeshStandardMaterial({ color: 0x2a221a, roughness: 0.9 }));
-    roof.position.set(x, h + h * 0.17, z);
-    roof.rotation.y = Math.PI / 4;
-    g.add(roof);
-    for (let i = 0; i < 4; i++) {
-      const win = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.2, 0.3),
-        new THREE.MeshBasicMaterial({ color: 0x3a2a1a, transparent: true, opacity: 0.3 })
-      );
-      const wx = x + (i < 2 ? -1 : 1) * w * 0.25;
-      const wz = z + (i % 2 === 0 ? -1 : 1) * d * 0.25;
-      win.position.set(wx, h * 0.45, wz);
-      g.add(win);
+  function bldg(x,z,w,h,d,color,winColor=0xffcc88){
+    const g=new THREE.Group();
+    const wall=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
+      new THREE.MeshStandardMaterial({ color, roughness:0.85 }));
+    wall.position.set(x,h/2,z); wall.castShadow=true; g.add(wall);
+    const roof=new THREE.Mesh(new THREE.ConeGeometry(w*0.75,h*0.3,4),
+      new THREE.MeshStandardMaterial({ color:0x2a1a10, roughness:0.9 }));
+    roof.position.set(x,h+h*0.15,z); roof.rotation.y=Math.PI/4; g.add(roof);
+    for(let i=0;i<3;i++){
+      const win=new THREE.Mesh(new THREE.PlaneGeometry(0.22,0.28),
+        new THREE.MeshBasicMaterial({ color:winColor, transparent:true, opacity:0.25+Math.random()*0.15 }));
+      const wx=x+((i%2===0)?-1:1)*w*0.28; const wz=z+((i<2)?-1:1)*d*0.28;
+      win.position.set(wx, h*0.45, wz); g.add(win);
     }
     scene.add(g);
-    return g;
   }
+  bldg(-4.2,-2.8,1.8,1.6,1.8,0x2a2018); bldg(4.0,-2.8,1.6,1.8,1.6,0x221d16);
+  bldg(4.5,3.0,2.0,1.5,1.6,0x2a2018); bldg(-4.5,2.8,1.8,1.7,1.8,0x221d16);
 
-  bldg(-4.0, -2.5, 1.8, 1.6, 1.8, 0x2a221d); // left
-  bldg(3.8, -2.5, 1.6, 1.8, 1.6, 0x221d18); // right
-  bldg(4.2, 2.8, 2.0, 1.4, 1.6, 0x2a221d); // back right
-  bldg(-4.2, 2.5, 1.8, 1.6, 1.8, 0x221d18); // back left
-
-  function tree(x, z) {
-    const t = new THREE.Group();
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.5, 4), new THREE.MeshStandardMaterial({ color: 0x1a1510 }));
-    trunk.position.y = 0.25;
-    t.add(trunk);
-    const crown = new THREE.Mesh(new THREE.SphereGeometry(0.4, 5, 5), new THREE.MeshStandardMaterial({ color: 0x0a1a0a, roughness: 0.9 }));
-    crown.position.y = 0.7; crown.scale.y = 0.8;
-    t.add(crown);
-    t.position.set(x, 0, z);
-    scene.add(t);
+  function lamp(x,z){
+    const g=new THREE.Group();
+    new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.035,1.0,6),
+      new THREE.MeshStandardMaterial({ color:0x1a1510 })).position.set(0,0.5,0); // add to g
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.025,0.035,1.0,6),
+      new THREE.MeshStandardMaterial({ color:0x1a1510 }));
+    pole.position.y=0.5; g.add(pole);
+    const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6),
+      new THREE.MeshBasicMaterial({ color:0xffcc88 })); bulb.position.y=1.1; g.add(bulb);
+    const bg=new THREE.Mesh(new THREE.SphereGeometry(0.18,8,8),
+      new THREE.MeshBasicMaterial({ color:0xffcc88, transparent:true, opacity:0.04 }));
+    bg.position.y=1.1; g.add(bg);
+    g.position.set(x,0,z); scene.add(g);
+    const pl=new THREE.PointLight(0xffcc88,0.4,3); pl.position.set(x,1.2,z); scene.add(pl);
   }
-  tree(-5.5, -4); tree(5.5, -3.8); tree(-5.8, 4); tree(5.5, 4.2);
+  lamp(-3.0,-3.5); lamp(3.0,-3.5); lamp(-3.2,3.8); lamp(3.2,3.8);
 
-  function lamp(x, z) {
-    const g = new THREE.Group();
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 1.2, 6), new THREE.MeshStandardMaterial({ color: 0x1a1510 }));
-    pole.position.y = 0.6;
-    g.add(pole);
-    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), new THREE.MeshBasicMaterial({ color: 0xffcc88 }));
-    bulb.position.set(0, 1.25, 0);
-    g.add(bulb);
-    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffcc88, transparent: true, opacity: 0.06 }));
-    glow.position.copy(bulb.position);
-    g.add(glow);
-    g.position.set(x, 0, z);
-    scene.add(g);
-    const pl = new THREE.PointLight(0xffcc88, 0.3, 3);
-    pl.position.set(x, 1.3, z);
-    scene.add(pl);
-  }
-  lamp(-2.8, -3.2); lamp(2.8, -3.2); lamp(-3.0, 3.5); lamp(3.0, 3.5);
+  const fountain=new THREE.Group();
+  const fb=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.55,0.15,8),
+    new THREE.MeshStandardMaterial({ color:0x2a221d })); fb.position.y=0.08; fountain.add(fb);
+  const fp=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.08,0.4,6),
+    new THREE.MeshStandardMaterial({ color:0x2a221d })); fp.position.y=0.35; fountain.add(fp);
+  const ft=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.04,6,12),
+    new THREE.MeshStandardMaterial({ color:0x2a221d })); ft.position.y=0.6; ft.rotation.x=Math.PI/2; fountain.add(ft);
+  fountain.position.set(0,0,0.5); scene.add(fountain);
 
-  const fountain = new THREE.Group();
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.2, 8), new THREE.MeshStandardMaterial({ color: 0x2a221d }));
-  base.position.y = 0.1;
-  fountain.add(base);
-  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.5, 6), new THREE.MeshStandardMaterial({ color: 0x2a221d }));
-  pillar.position.y = 0.45;
-  fountain.add(pillar);
-  const bowl = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.05, 6, 12), new THREE.MeshStandardMaterial({ color: 0x2a221d }));
-  bowl.position.y = 0.75; bowl.rotation.x = Math.PI / 2;
-  fountain.add(bowl);
-  fountain.position.set(0, 0, 0.5);
-  scene.add(fountain);
-
-  const houseGroup = new THREE.Group();
-  houseGroup.position.set(0, 0, 8);
-  const hw = new THREE.Mesh(new THREE.BoxGeometry(2.8, 2.2, 2.8), new THREE.MeshStandardMaterial({ color: 0x1a1512, roughness: 0.9 }));
-  hw.position.y = 1.1;
-  houseGroup.add(hw);
-  const hr = new THREE.Mesh(new THREE.ConeGeometry(2.2, 0.8, 4), new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.9 }));
-  hr.position.y = 2.6; hr.rotation.y = Math.PI / 4;
-  houseGroup.add(hr);
-  houseGroup.visible = false;
-  scene.add(houseGroup);
-  return houseGroup;
+  const hg=new THREE.Group(); hg.position.set(0,0,8);
+  const hw=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.0,2.6),
+    new THREE.MeshStandardMaterial({ color:0x1a1512, roughness:0.9 }));
+  hw.position.y=1.0; hg.add(hw);
+  const hr=new THREE.Mesh(new THREE.ConeGeometry(2.0,0.7,4),
+    new THREE.MeshStandardMaterial({ color:0x2a1a10, roughness:0.9 }));
+  hr.position.y=2.35; hr.rotation.y=Math.PI/4; hg.add(hr);
+  hg.visible=false; scene.add(hg);
+  return hg;
 }
-
-let houseExterior = createTown();
+let houseExterior = buildTown();
 
 // ─── HOUSE INTERIOR ──────────────────────────────────
 let houseScene = null;
-function createHouseInterior() {
-  const g = new THREE.Group();
+function buildHouse() {
+  const g=new THREE.Group();
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(5,5),
+    new THREE.MeshStandardMaterial({ color:0x0a0806, roughness:0.95 }));
+  floor.rotation.x=-Math.PI/2; floor.position.y=-0.05; g.add(floor);
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.MeshStandardMaterial({ color: 0x0a0806, roughness: 0.95 }));
-  floor.rotation.x = -Math.PI / 2; floor.position.y = -0.05;
-  g.add(floor);
+  const w1=new THREE.Mesh(new THREE.PlaneGeometry(5,3),
+    new THREE.MeshStandardMaterial({ color:0x0d0a08, side:THREE.DoubleSide, roughness:0.9 }));
+  w1.position.set(0,1.5,-2.5); g.add(w1);
 
-  const w1 = new THREE.Mesh(new THREE.PlaneGeometry(5, 3), new THREE.MeshStandardMaterial({ color: 0x0f0c08, side: THREE.DoubleSide, roughness: 0.9 }));
-  w1.position.set(0, 1.5, -2.5); g.add(w1);
-  const w2 = new THREE.Mesh(new THREE.PlaneGeometry(5, 3), new THREE.MeshStandardMaterial({ color: 0x0f0c08, side: THREE.DoubleSide, roughness: 0.9 }));
-  w2.position.set(2.5, 1.5, 0); w2.rotation.y = Math.PI / 2; g.add(w2);
-  const w3 = new THREE.Mesh(new THREE.PlaneGeometry(5, 3), new THREE.MeshStandardMaterial({ color: 0x0f0c08, side: THREE.DoubleSide, roughness: 0.9 }));
-  w3.position.set(-2.5, 1.5, 0); w3.rotation.y = -Math.PI / 2; g.add(w3);
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.04,0.12,6),
+    new THREE.MeshBasicMaterial({ color:0xd4a060 }));
+  c.position.set(0.3,0.08,-0.5); g.add(c);
+  const fl=new THREE.Mesh(new THREE.SphereGeometry(0.035,6,6),
+    new THREE.MeshBasicMaterial({ color:0xff8844 }));
+  fl.position.set(0.3,0.18,-0.5); g.add(fl);
+  const pl=new THREE.PointLight(0xff8844,0.5,4); pl.position.set(0.3,0.4,-0.5); g.add(pl);
 
-  const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.15, 6), new THREE.MeshBasicMaterial({ color: 0xd4a060 }));
-  candle.position.set(0.3, 0.1, -0.5);
-  g.add(candle);
-  const flame = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), new THREE.MeshBasicMaterial({ color: 0xff8844 }));
-  flame.position.set(0.3, 0.2, -0.5);
-  g.add(flame);
+  const eMat=new THREE.MeshStandardMaterial({ color:0x886688, emissive:0x664466,
+    emissiveIntensity:0.1, roughness:0.3, metalness:0.5, transparent:true, opacity:0 });
+  const em=new THREE.Mesh(new THREE.IcosahedronGeometry(0.3,0), eMat);
+  em.position.set(-0.5,0.3,0.8); g.add(em);
+  const eg=new THREE.Mesh(new THREE.SphereGeometry(0.45,8,8),
+    new THREE.MeshBasicMaterial({ color:0x886688, transparent:true, opacity:0, side:THREE.BackSide }));
+  eg.position.copy(em.position); g.add(eg);
 
-  const pl = new THREE.PointLight(0xff8844, 0.6, 4);
-  pl.position.set(0.3, 0.5, -0.5);
-  g.add(pl);
-
-  const emilyMat = new THREE.MeshStandardMaterial({
-    color: 0x886688, emissive: 0x664466, emissiveIntensity: 0.15,
-    roughness: 0.3, metalness: 0.5, transparent: true, opacity: 0,
-  });
-  const emily = new THREE.Mesh(new THREE.IcosahedronGeometry(0.35, 0), emilyMat);
-  emily.position.set(-0.5, 0.35, 0.8);
-  g.add(emily);
-
-  const emilyGlow = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 8, 8),
-    new THREE.MeshBasicMaterial({ color: 0x886688, transparent: true, opacity: 0, side: THREE.BackSide })
-  );
-  emilyGlow.position.copy(emily.position);
-  g.add(emilyGlow);
-
-  const emilyLabel = (() => {
-    const c = document.createElement('canvas'); c.width = 300; c.height = 60;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = 'rgba(6,4,3,0.7)'; ctx.beginPath(); ctx.roundRect(10, 8, 280, 44, 6); ctx.fill();
-    ctx.strokeStyle = 'rgba(180,160,140,0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(10, 8, 280, 44, 6); ctx.stroke();
-    ctx.fillStyle = '#c8b8a8'; ctx.font = '18px "Georgia"'; ctx.textAlign = 'center';
-    ctx.fillText('Emily Miller', 150, 40);
-    const t = new THREE.CanvasTexture(c);
-    const m = new THREE.SpriteMaterial({ map: t, transparent: true, opacity: 0, depthTest: false });
-    const s = new THREE.Sprite(m); s.scale.set(1.6, 0.32, 1);
-    s.position.set(-0.5, 0.9, 0.8);
+  const elbl=(()=>{
+    const c=document.createElement('canvas'); c.width=300; c.height=60;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='rgba(10,8,6,0.75)'; ctx.beginPath(); ctx.roundRect(10,8,280,44,8); ctx.fill();
+    ctx.strokeStyle='rgba(200,180,160,0.12)'; ctx.stroke();
+    ctx.fillStyle='#d4c8b8'; ctx.font='17px "Georgia"'; ctx.textAlign='center';
+    ctx.fillText('Emily Miller',150,40);
+    const t=new THREE.CanvasTexture(c);
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({ map:t, transparent:true, opacity:0, depthTest:false }));
+    s.scale.set(1.5,0.3,1); s.position.set(-0.5,0.8,0.8);
     return s;
   })();
-  g.add(emilyLabel);
-
-  g.visible = false;
-  scene.add(g);
-  houseScene = { group: g, emily, emilyMat, emilyGlow, emilyLabel, flame, candle, pl };
-  return houseScene;
+  g.add(elbl);
+  g.visible=false; scene.add(g);
+  houseScene={ group:g, emily:em, eMat, eg, elbl, flame:fl, candle:c, pl };
 }
-createHouseInterior();
+buildHouse();
 
 // ─── RAYCASTER ───────────────────────────────────────
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-let hoverNPC = null;
-
-function getNPCIntersects() {
-  const hits = raycaster.intersectObjects(npcMeshes);
-  if (hits.length) {
-    const g = hits[0].object.parent;
-    if (g && g.userData.npcIdx !== undefined) return g.userData.npcIdx;
-  }
+const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2();
+function hitNPC(){
+  const hits=raycaster.intersectObjects(npcMeshes);
+  if(hits.length){ const g=hits[0].object.parent; if(g&&g.userData.npcIdx!==undefined) return g.userData.npcIdx; }
   return -1;
 }
-
-function onMove(e) {
-  if (!S.canInteract || S.dialogOpen) { renderer.domElement.style.cursor = 'default'; return; }
-  mouse.x = (e.clientX / innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const idx = getNPCIntersects();
-  renderer.domElement.style.cursor = idx >= 0 ? 'pointer' : 'default';
-  hoverNPC = idx;
+function onMove(e){
+  if(!S.canInteract||S.dialogOpen){ renderer.domElement.style.cursor='default'; return; }
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  renderer.domElement.style.cursor=hitNPC()>=0?'pointer':'default';
+}
+function onClick(e){
+  if(!S.canInteract||S.dialogOpen||S.phase==='ending') return;
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const idx=hitNPC();
+  if(idx>=0&&!S.npc[idx].itemGiven) startDialogue(idx);
 }
 
-function onClick(e) {
-  if (!S.canInteract || S.dialogOpen) return;
-  if (S.phase === 'ending') return;
-  mouse.x = (e.clientX / innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const idx = getNPCIntersects();
-  if (idx >= 0 && !S.npc[idx].itemGiven) {
-    startNPCDialogue(idx);
-  }
+// ─── DIALOGUE ────────────────────────────────────────
+let typing=false, skipTyping=false, dHandler=null;
+function tw(el,text,speed,cb){
+  typing=true; skipTyping=false; el.innerHTML=''; let i=0;
+  const tick=()=>{
+    if(skipTyping){ el.innerHTML=''; for(const ch of text) el.innerHTML+=ch==='\n'?'<br>':ch; typing=false; if(cb) cb(); return; }
+    if(i<text.length){ const ch=text[i]; el.innerHTML+=ch==='\n'?'<br>':ch; i++; setTimeout(tick,speed); }
+    else{ typing=false; if(cb) cb(); }
+  }; tick();
+}
+function closeD(){ S.dialogOpen=false; document.getElementById('dialogue').className=''; }
+
+function startDialogue(idx){
+  S.dialogOpen=true; S.npcIdx=idx;
+  const data=NPC_DATA[idx], ns=S.npc[idx],
+    box=document.getElementById('dialogue'), name=document.getElementById('dName'),
+    text=document.getElementById('dText'), choices=document.getElementById('dChoices'),
+    cont=document.getElementById('dCont');
+  box.className='visible'; choices.innerHTML=''; cont.className='';
+  if(!ns.talkedTo){
+    ns.talkedTo=true; name.textContent='\u2726 '+data.name;
+    tw(text,data.intro,22,()=>{ cont.textContent='▼ continue'; cont.className='show'; });
+    if(dHandler) document.removeEventListener('click',dHandler);
+    dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); showQ(idx); };
+    document.addEventListener('click',dHandler);
+  } else showQ(idx);
 }
 
-// ─── DIALOGUE SYSTEM ─────────────────────────────────
-let typing = false, skipTyping = false, dialogHandler = null;
-
-function typewrite(el, text, speed, cb) {
-  typing = true; skipTyping = false;
-  el.innerHTML = '';
-  let i = 0;
-  const tick = () => {
-    if (skipTyping) { el.innerHTML = ''; for (const ch of text) { el.innerHTML += ch === '\n' ? '<br>' : ch; } typing = false; if (cb) cb(); return; }
-    if (i < text.length) { const ch = text[i]; el.innerHTML += ch === '\n' ? '<br>' : ch; i++; setTimeout(tick, speed); }
-    else { typing = false; if (cb) cb(); }
-  };
-  tick();
-}
-
-function clearDialogue() {
-  S.dialogOpen = false;
-  document.getElementById('dialogue').className = '';
-}
-
-function startNPCDialogue(idx) {
-  S.dialogOpen = true;
-  S.npcIdx = idx;
-  const data = NPC_DATA[idx];
-  const nstate = S.npc[idx];
-  const box = document.getElementById('dialogue');
-  const name = document.getElementById('dName');
-  const text = document.getElementById('dText');
-  const choices = document.getElementById('dChoices');
-  const cont = document.getElementById('dCont');
-  box.className = 'visible'; choices.innerHTML = ''; cont.className = '';
-
-  if (!nstate.talkedTo) {
-    nstate.talkedTo = true;
-    name.textContent = '\u2726 ' + data.name;
-    typewrite(text, data.intro, 22, () => {
-      cont.textContent = '▼ continue'; cont.className = 'show';
-    });
-    if (dialogHandler) document.removeEventListener('click', dialogHandler);
-    dialogHandler = () => {
-      if (typing) { skipTyping = true; return; }
-      document.removeEventListener('click', dialogHandler);
-      showQuestions(idx);
-    };
-    document.addEventListener('click', dialogHandler);
-  } else {
-    showQuestions(idx);
-  }
-}
-
-function showQuestions(idx) {
-  const data = NPC_DATA[idx];
-  const nstate = S.npc[idx];
-  const text = document.getElementById('dText');
-  const choices = document.getElementById('dChoices');
-  const cont = document.getElementById('dCont');
-  cont.className = '';
-
-  const available = data.questions.filter((_, i) => !nstate.asked.includes(i));
-
-  if (available.length === 0) {
-    if (!nstate.itemGiven && data.item) {
-      nstate.itemGiven = true;
-      S.inventory.push(data.item);
-      updateInventory();
-      name: name;
-      name.textContent = '\u2726 ' + data.name;
-      typewrite(text, data.item.give, 22, () => {
-        cont.textContent = '▼ ' + data.item.name + ' acquired'; cont.className = 'show';
-      });
-      if (dialogHandler) document.removeEventListener('click', dialogHandler);
-      dialogHandler = () => {
-        if (typing) { skipTyping = true; return; }
-        document.removeEventListener('click', dialogHandler);
-        farewellNPC(idx);
-      };
-      document.addEventListener('click', dialogHandler);
-    } else {
-      farewellNPC(idx);
-    }
+function showQ(idx){
+  const data=NPC_DATA[idx], ns=S.npc[idx],
+    text=document.getElementById('dText'), choices=document.getElementById('dChoices'),
+    cont=document.getElementById('dCont');
+  cont.className=''; const avail=data.questions.filter((_,i)=>!ns.asked.includes(i));
+  if(avail.length===0){
+    if(!ns.itemGiven&&data.item){
+      ns.itemGiven=true; S.inventory.push(data.item); updateInv();
+      document.getElementById('dName').textContent='\u2726 '+data.name;
+      tw(text,data.item.give,22,()=>{ cont.textContent='▼ '+data.item.name+' acquired'; cont.className='show'; });
+      if(dHandler) document.removeEventListener('click',dHandler);
+      dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); byeNPC(idx); };
+      document.addEventListener('click',dHandler);
+    } else byeNPC(idx);
     return;
   }
-
-  const name = document.getElementById('dName');
-  name.textContent = '\u2726 ' + data.name;
-  text.textContent = 'What would you like to ask?';
-  choices.innerHTML = '';
-
-  available.forEach((q, ai) => {
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = '\u2192 ' + q.q;
-    btn.addEventListener('click', () => {
-      const realIdx = data.questions.indexOf(q);
-      nstate.asked.push(realIdx);
-      askQuestion(idx, realIdx);
-    });
+  document.getElementById('dName').textContent='\u2726 '+data.name;
+  text.textContent='What would you like to ask?'; choices.innerHTML='';
+  avail.forEach(q=>{
+    const btn=document.createElement('button'); btn.className='btn';
+    btn.textContent='\u2192 '+q.q;
+    btn.addEventListener('click',()=>{ const ri=data.questions.indexOf(q); ns.asked.push(ri); askQ(idx,ri); });
     choices.appendChild(btn);
   });
-
-  if (nstate.asked.length > 0) {
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = '\u2192 That\u2019s all I needed';
-    btn.style.opacity = '0.6';
-    btn.addEventListener('click', () => {
-      if (!nstate.itemGiven && data.item) {
-        nstate.itemGiven = true;
-        S.inventory.push(data.item);
-        updateInventory();
-        document.getElementById('dChoices').innerHTML = '';
-        typewrite(text, data.item.give, 22, () => {
-          cont.textContent = '▼ ' + data.item.name + ' acquired'; cont.className = 'show';
-        });
-        if (dialogHandler) document.removeEventListener('click', dialogHandler);
-        dialogHandler = () => {
-          if (typing) { skipTyping = true; return; }
-          document.removeEventListener('click', dialogHandler);
-          farewellNPC(idx);
-        };
-        document.addEventListener('click', dialogHandler);
-      } else {
-        farewellNPC(idx);
-      }
+  if(ns.asked.length>0){
+    const btn=document.createElement('button'); btn.className='btn';
+    btn.textContent='\u2192 That\u2019s all I needed'; btn.style.opacity='0.5';
+    btn.addEventListener('click',()=>{
+      if(!ns.itemGiven&&data.item){
+        ns.itemGiven=true; S.inventory.push(data.item); updateInv();
+        document.getElementById('dChoices').innerHTML='';
+        tw(text,data.item.give,22,()=>{ cont.textContent='▼ '+data.item.name+' acquired'; cont.className='show'; });
+        if(dHandler) document.removeEventListener('click',dHandler);
+        dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); byeNPC(idx); };
+        document.addEventListener('click',dHandler);
+      } else byeNPC(idx);
     });
     choices.appendChild(btn);
   }
-  cont.className = '';
 }
 
-function askQuestion(idx, qi) {
-  const data = NPC_DATA[idx];
-  const text = document.getElementById('dText');
-  const choices = document.getElementById('dChoices');
-  const cont = document.getElementById('dCont');
-  choices.innerHTML = '';
-  cont.className = '';
+function askQ(idx,qi){
+  const data=NPC_DATA[idx], text=document.getElementById('dText'),
+    choices=document.getElementById('dChoices'), cont=document.getElementById('dCont');
+  choices.innerHTML=''; cont.className='';
+  tw(text,data.questions[qi].a,22,()=>{ cont.textContent='▼ continue'; cont.className='show'; });
+  if(dHandler) document.removeEventListener('click',dHandler);
+  dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); showQ(idx); };
+  document.addEventListener('click',dHandler);
+}
 
-  typewrite(text, data.questions[qi].a, 22, () => {
-    cont.textContent = '▼ continue'; cont.className = 'show';
+function byeNPC(idx){
+  const data=NPC_DATA[idx], text=document.getElementById('dText'),
+    choices=document.getElementById('dChoices'), cont=document.getElementById('dCont');
+  choices.innerHTML='';
+  tw(text,data.farewell,25,()=>{ cont.textContent='▼ close'; cont.className='show'; });
+  if(dHandler) document.removeEventListener('click',dHandler);
+  dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); closeD(); checkTravel(); };
+  document.addEventListener('click',dHandler);
+}
+
+// ─── HOUSE ───────────────────────────────────────────
+function startHouse(){
+  S.phase='house'; S.dialogOpen=true; document.getElementById('fade').style.opacity='1';
+  setTimeout(()=>{
+    scene.background=new THREE.Color(0x080608); scene.fog=new THREE.Fog(0x080608,5,10);
+    camera.position.set(1.5,1.0,2.8); controls.target.set(0,0.3,0);
+    controls.minDistance=1.5; controls.maxDistance=5; controls.update();
+    npcGroups.forEach(g=>g.visible=false); houseExterior.visible=false;
+    if(houseScene){ houseScene.group.visible=true; houseScene.eMat.opacity=0; houseScene.eg.material.opacity=0; houseScene.elbl.material.opacity=0; }
+    document.getElementById('travelBtn').className=''; document.getElementById('locName').textContent='◆ MILLER HOUSE — BASEMENT';
+    document.getElementById('hint').className=''; document.getElementById('fade').style.opacity='0';
+    setTimeout(()=>playHouse(0),900);
+  },800);
+}
+
+function playHouse(step){
+  if(step>=HOUSE_DIALOGUE.length){ houseChoice(); return; }
+  S.houseStep=step;
+  const box=document.getElementById('dialogue'), text=document.getElementById('dText'),
+    choices=document.getElementById('dChoices'), cont=document.getElementById('dCont');
+  box.className='visible'; choices.innerHTML=''; cont.className='';
+  document.getElementById('dName').textContent='\u2726 ???';
+  tw(text,HOUSE_DIALOGUE[step],25,()=>{ cont.textContent='▼ continue'; cont.className='show'; });
+  if(step>=3&&houseScene){
+    houseScene.emily.material.opacity=Math.min(1,(step-2)*0.5);
+    houseScene.eg.material.opacity=Math.min(0.1,(step-2)*0.035);
+    houseScene.elbl.material.opacity=Math.min(1,(step-2)*0.5);
+    document.getElementById('dName').textContent='\u2726 Emily Miller';
+  }
+  if(dHandler) document.removeEventListener('click',dHandler);
+  dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); playHouse(step+1); };
+  document.addEventListener('click',dHandler);
+}
+
+function houseChoice(){
+  const text=document.getElementById('dText'), choices=document.getElementById('dChoices'), cont=document.getElementById('dCont');
+  cont.className=''; text.textContent='She holds the candle closer. Her eyes ask the question for her. What do you do?';
+  const b1=document.createElement('button'); b1.className='btn';
+  b1.textContent='\u2192 "I believe you, Emily. Let\u2019s end this."';
+  b1.addEventListener('click',()=>endGame('expose')); choices.appendChild(b1);
+  const b2=document.createElement('button'); b2.className='btn';
+  b2.textContent='\u2192 "I believe you. But I can\u2019t fight him. Go."'; b2.style.opacity='0.6';
+  b2.addEventListener('click',()=>endGame('escape')); choices.appendChild(b2);
+}
+
+function endGame(type){
+  S.ending=type; S.phase='ending'; const end=ENDINGS[type];
+  const finalEl=document.getElementById('final');
+  finalEl.querySelector('p').innerHTML=end.line+'<br><br>'+end.story;
+  finalEl.querySelector('.sub').textContent=end.final;
+  finalEl.className='visible'; document.getElementById('dialogue').className='';
+  if(houseScene&&type==='expose'){
+    houseScene.emily.material.color.setHex(0x88bb88);
+    houseScene.emily.material.emissive.setHex(0x44aa44);
+    houseScene.emily.material.emissiveIntensity=0.3;
+    houseScene.eg.material.color.setHex(0x88bb88);
+  }
+}
+
+function checkTravel(){
+  if(S.inventory.length>=3) document.getElementById('travelBtn').className='visible';
+}
+document.getElementById('travelBtn').addEventListener('click',()=>{ if(S.inventory.length>=3) startHouse(); });
+
+function updateInv(){
+  const inv=document.getElementById('inventory'); inv.innerHTML='';
+  S.inventory.forEach(item=>{
+    const slot=document.createElement('div'); slot.className='slot filled';
+    slot.textContent=item.icon;
+    const hint=document.createElement('div'); hint.className='hint';
+    hint.textContent=item.name+' — '+item.desc; slot.appendChild(hint); inv.appendChild(slot);
   });
-  if (dialogHandler) document.removeEventListener('click', dialogHandler);
-  dialogHandler = () => {
-    if (typing) { skipTyping = true; return; }
-    document.removeEventListener('click', dialogHandler);
-    showQuestions(idx);
-  };
-  document.addEventListener('click', dialogHandler);
 }
 
-function farewellNPC(idx) {
-  const data = NPC_DATA[idx];
-  const text = document.getElementById('dText');
-  const choices = document.getElementById('dChoices');
-  const cont = document.getElementById('dCont');
-  choices.innerHTML = '';
-  name: name;
+// ─── PROLOGUE ────────────────────────────────────────
+function runPrologue(){
+  const slides=['slide0','slide1','slide2','slide3','slide4','slide5'];
+  let ci=0, waiting=false, ended=false;
+  const pro=document.getElementById('prologue'), click=document.getElementById('proClick');
 
-  typewrite(text, data.farewell, 25, () => {
-    cont.textContent = '▼ close'; cont.className = 'show';
-  });
-  if (dialogHandler) document.removeEventListener('click', dialogHandler);
-  dialogHandler = () => {
-    if (typing) { skipTyping = true; return; }
-    document.removeEventListener('click', dialogHandler);
-    clearDialogue();
-    checkTravel();
-  };
-  document.addEventListener('click', dialogHandler);
+  function showSlide(i){
+    if(i>=slides.length){ endPrologue(); return; }
+    document.querySelectorAll('.slide').forEach(s=>s.className='slide');
+    const el=document.getElementById(slides[i]);
+    setTimeout(()=>{ el.className='slide visible'; waiting=true; click.className='click-hint show'; },100);
+    ci=i;
+  }
+
+  function nextSlide(){
+    if(!waiting) return; waiting=false; click.className='click-hint';
+    document.getElementById(slides[ci]).className='slide out';
+    setTimeout(()=>showSlide(ci+1),300);
+  }
+
+  function endPrologue(){
+    ended=true; click.className='click-hint';
+    document.getElementById('prologue').style.opacity='0';
+    setTimeout(()=>{
+      document.getElementById('prologue').style.display='none';
+      showTitle();
+    },1200);
+  }
+
+  document.addEventListener('click',()=>{ if(ended) return; if(waiting) nextSlide(); });
+  showSlide(0);
 }
 
-// ─── HOUSE SEQUENCE ──────────────────────────────────
-function startHouseSequence() {
-  S.phase = 'house';
-  S.dialogOpen = true;
-  const fade = document.getElementById('fade');
-  fade.style.opacity = '1';
-
-  setTimeout(() => {
-    scene.background = new THREE.Color(0x040304);
-    scene.fog = new THREE.Fog(0x040304, 5, 10);
-    camera.position.set(1.5, 1.2, 2.8);
-    controls.target.set(0, 0.3, 0);
-    controls.minDistance = 1.5;
-    controls.maxDistance = 5;
-    controls.update();
-
-    npcGroups.forEach(g => g.visible = false);
-    houseExterior.visible = false;
-    if (houseScene) {
-      houseScene.group.visible = true;
-      houseScene.emilyMat.opacity = 0;
-      houseScene.emilyGlow.material.opacity = 0;
-      houseScene.emilyLabel.material.opacity = 0;
+function showTitle(){
+  const title=document.getElementById('title');
+  setTimeout(()=>{ title.className='visible'; },200);
+  document.addEventListener('click',()=>{
+    if(title.className==='visible'){
+      title.className='hidden';
+      setTimeout(()=>{ title.style.display='none'; startGame(); },1500);
     }
-
-    document.getElementById('travelBtn').className = '';
-    document.getElementById('locName').textContent = '◆ MILLER HOUSE — BASEMENT';
-    document.getElementById('locName').className = 'visible';
-    document.getElementById('hint').className = '';
-
-    fade.style.opacity = '0';
-    setTimeout(() => {
-      playHouseDialogue(0);
-    }, 900);
-  }, 800);
+  },{once:true});
 }
 
-function playHouseDialogue(step) {
-  if (step >= HOUSE_DIALOGUE.length) {
-    showHouseChoice();
-    return;
-  }
-  S.houseStep = step;
-  const box = document.getElementById('dialogue');
-  const text = document.getElementById('dText');
-  const choices = document.getElementById('dChoices');
-  const cont = document.getElementById('dCont');
-  box.className = 'visible'; choices.innerHTML = ''; cont.className = '';
-  document.getElementById('dName').textContent = '\u2726 ???';
-
-  typewrite(text, HOUSE_DIALOGUE[step], 25, () => {
-    cont.textContent = '▼ continue'; cont.className = 'show';
-  });
-
-  if (step === 3 || step === 4) {
-    const em = houseScene.emily;
-    const glow = houseScene.emilyGlow;
-    em.material.opacity = Math.min(1, (step - 2) * 0.5);
-    glow.material.opacity = Math.min(0.12, (step - 2) * 0.04);
-    houseScene.emilyLabel.material.opacity = Math.min(1, (step - 2) * 0.5);
-    document.getElementById('dName').textContent = '\u2726 Emily Miller';
-  }
-
-  if (dialogHandler) document.removeEventListener('click', dialogHandler);
-  dialogHandler = () => {
-    if (typing) { skipTyping = true; return; }
-    document.removeEventListener('click', dialogHandler);
-    playHouseDialogue(step + 1);
-  };
-  document.addEventListener('click', dialogHandler);
-}
-
-function showHouseChoice() {
-  const text = document.getElementById('dText');
-  const choices = document.getElementById('dChoices');
-  const cont = document.getElementById('dCont');
-  cont.className = '';
-  text.textContent = 'She waits. Her eyes ask the question for her. What do you do?';
-
-  const b1 = document.createElement('button');
-  b1.className = 'btn';
-  b1.textContent = '\u2192 "I believe you. Let\u2019s end this."';
-  b1.addEventListener('click', () => endGame('expose'));
-  choices.appendChild(b1);
-
-  const b2 = document.createElement('button');
-  b2.className = 'btn';
-  b2.textContent = '\u2192 "I believe you. But I can\u2019t help. Go."';
-  b2.style.opacity = '0.7';
-  b2.addEventListener('click', () => endGame('escape'));
-  choices.appendChild(b2);
-}
-
-function endGame(type) {
-  S.ending = type;
-  S.phase = 'ending';
-  const end = ENDINGS[type];
-  const finalEl = document.getElementById('final');
-  const p = finalEl.querySelector('p');
-  const sub = finalEl.querySelector('.sub');
-
-  document.getElementById('dialogue').className = '';
-
-  p.innerHTML = end.line + '<br><br>' + end.story;
-  sub.textContent = end.final;
-  finalEl.className = 'visible';
-
-  if (houseScene) {
-    const em = houseScene.emily;
-    if (type === 'expose') {
-      em.material.color.setHex(0x88bb88);
-      em.material.emissive.setHex(0x44aa44);
-      em.material.emissiveIntensity = 0.3;
-      houseScene.emilyGlow.material.color.setHex(0x88bb88);
-    }
-  }
-}
-
-// ─── TRAVEL ──────────────────────────────────────────
-function checkTravel() {
-  if (S.inventory.length >= 3) {
-    const btn = document.getElementById('travelBtn');
-    btn.className = 'visible';
-  }
-}
-
-document.getElementById('travelBtn').addEventListener('click', () => {
-  if (S.inventory.length >= 3) startHouseSequence();
-});
-
-// ─── UI HELPERS ──────────────────────────────────────
-function updateInventory() {
-  const inv = document.getElementById('inventory');
-  inv.innerHTML = '';
-  S.inventory.forEach(item => {
-    const slot = document.createElement('div');
-    slot.className = 'slot filled';
-    slot.textContent = item.icon;
-    const hint = document.createElement('div');
-    hint.className = 'hint';
-    hint.textContent = item.name + ' — ' + item.desc;
-    slot.appendChild(hint);
-    inv.appendChild(slot);
-  });
-}
-
-// ─── INTRO ───────────────────────────────────────────
-function startGame() {
-  document.getElementById('locName').className = 'visible';
-  document.getElementById('hint').className = 'visible';
-
-  const dur = 1500; const start = performance.now();
-  const appear = (t) => {
-    const p = Math.min((t - start) / dur, 1); const e = 1 - Math.pow(1 - p, 2);
-    npcObjects.forEach((o, i) => {
-      o.mat.opacity = e; o.glow.material.opacity = e * 0.08;
-      o.labelMat.opacity = e;
-    });
-    if (p < 1) requestAnimationFrame(appear);
-    else { S.canInteract = true; }
+function startGame(){
+  document.getElementById('locName').className='visible';
+  document.getElementById('hint').className='visible';
+  const dur=1800, start=performance.now();
+  const appear=(t)=>{
+    const p=Math.min((t-start)/dur,1), e=1-Math.pow(1-p,2);
+    npcObjs.forEach(o=>{ o.mat.opacity=e; o.glow.material.opacity=e*0.06; o.labelMesh.material.opacity=e; });
+    if(p<1) requestAnimationFrame(appear); else S.canInteract=true;
   };
   requestAnimationFrame(appear);
+  initAudio();
+}
+
+// ─── AUDIO ───────────────────────────────────────────
+let actx=null;
+function initAudio(){
+  if(actx) return;
+  try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+  // warm ambient drone
+  const osc=actx.createOscillator(); const gain=actx.createGain();
+  osc.connect(gain); gain.connect(actx.destination);
+  osc.type='sine'; osc.frequency.setValueAtTime(55,actx.currentTime);
+  gain.gain.setValueAtTime(0.015,actx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.005,actx.currentTime+2);
+  osc.start();
+  const mod=actx.createOscillator(); const mg=actx.createGain();
+  mod.connect(mg); mg.connect(osc.frequency);
+  mod.frequency.setValueAtTime(0.08,actx.currentTime);
+  mg.gain.setValueAtTime(2,actx.currentTime); mod.start();
+  // wind chimes
+  let chimeTimer=0;
+  function scheduleChime(){
+    const delay=5000+Math.random()*12000;
+    chimeTimer=setTimeout(()=>{
+      if(!actx) return;
+      const notes=[523,587,659,784,880,1047];
+      const n=notes[Math.floor(Math.random()*notes.length)];
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.connect(g); g.connect(actx.destination);
+      o.type='sine'; o.frequency.setValueAtTime(n,actx.currentTime);
+      g.gain.setValueAtTime(0.015,actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+1.2+Math.random()*0.8);
+      o.start(); o.stop(actx.currentTime+2);
+      scheduleChime();
+    },delay);
+  }
+  scheduleChime();
 }
 
 // ─── MAIN LOOP ───────────────────────────────────────
-let time = 0;
-
-function animate(t) {
-  requestAnimationFrame(animate);
-  controls.update();
-  time += 0.01;
-
-  npcObjects.forEach((o, idx) => {
-    const bob = Math.sin(time * 0.8 + idx * 1.5) * 0.04;
-    o.group.position.y = NPC_DATA[idx].pos[1] + bob;
-    o.mesh.rotation.x = time * 0.4 + idx;
-    o.mesh.rotation.y = time * 0.6 + idx;
-    const pulse = 1 + Math.sin(time * 2 + idx * 2) * 0.02;
-    o.mesh.scale.set(pulse, pulse, pulse);
-    o.glow.material.opacity = o.mat.opacity * (0.06 + Math.sin(time * 1.5 + idx) * 0.02);
+let gt=0;
+function animate(t){
+  requestAnimationFrame(animate); controls.update(); gt+=0.01;
+  npcObjs.forEach((o,i)=>{
+    const bob=Math.sin(gt*0.7+i*1.5)*0.035;
+    o.group.position.y=NPC_DATA[i].pos[1]+bob;
+    o.mesh.rotation.x=gt*0.3+i; o.mesh.rotation.y=gt*0.5+i;
+    const p=1+Math.sin(gt*1.8+i*2)*0.018;
+    o.mesh.scale.set(p,p,p);
+    o.glow.material.opacity=o.mat.opacity*(0.04+Math.sin(gt*1.2+i)*0.015);
   });
-
-  if (houseScene && houseScene.group.visible) {
-    const f = houseScene.flame;
-    if (f) {
-      const flicker = 0.9 + Math.sin(time * 50) * 0.05 + Math.sin(time * 73) * 0.03;
-      f.scale.set(flicker, flicker + 0.1, flicker);
-      houseScene.pl.intensity = 0.4 + Math.sin(time * 40) * 0.1 + Math.sin(time * 60) * 0.05;
-    }
-    const em = houseScene.emily;
-    if (em.material.opacity > 0) {
-      const pulse = 1 + Math.sin(time * 1.5) * 0.01;
-      em.scale.set(pulse, pulse, pulse);
-    }
+  // leaves
+  const lp=leaves.pos;
+  for(let i=0;i<lp.length;i+=3){
+    lp[i]+=leaves.vel[i/3].x+Math.sin(gt+i)*0.001;
+    lp[i+1]-=0.002+Math.sin(gt*0.5+i)*0.0005;
+    lp[i+2]+=leaves.vel[i/3].z;
+    if(lp[i+1]<-0.5){ lp[i+1]=3+Math.random()*4; const a=Math.random()*Math.PI*2, r=Math.random()*5; lp[i]=r*Math.cos(a); lp[i+2]=r*Math.sin(a); }
+    leaves.vel[i/3].x+=Math.sin(gt*0.3+i)*0.00005;
+    leaves.vel[i/3].z+=Math.cos(gt*0.3+i)*0.00005;
   }
+  leaves.points.geometry.attributes.position.needsUpdate=true;
 
-  renderer.render(scene, camera);
+  if(houseScene&&houseScene.group.visible){
+    const fl=houseScene.flame;
+    if(fl){ const f=0.9+Math.sin(gt*45)*0.05+Math.sin(gt*70)*0.03; fl.scale.set(f,f+0.1,f); houseScene.pl.intensity=0.3+Math.sin(gt*35)*0.08+Math.sin(gt*55)*0.04; }
+    const em=houseScene.emily;
+    if(em.material.opacity>0){ const p=1+Math.sin(gt*1.2)*0.01; em.scale.set(p,p,p); }
+  }
+  renderer.render(scene,camera);
 }
 
-window.addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight);
+});
+document.addEventListener('pointermove',onMove); document.addEventListener('pointerdown',onClick);
+document.getElementById('stayBtn').addEventListener('click',()=>{
+  document.getElementById('final').className='';
+  document.querySelector('#dialogue .text').textContent='The case is closed. The town of Blackwood returns to its quiet rhythm. But the garden at Miller House grows a little wilder every year. A reminder that some truths, once uncovered, bloom regardless of who tends them.';
+  document.getElementById('dialogue').className='visible';
+  document.getElementById('dName').textContent='\u2726 CASE FILE — BLACKWOOD';
 });
 
-document.addEventListener('pointermove', onMove);
-document.addEventListener('pointerdown', onClick);
-document.getElementById('stayBtn').addEventListener('click', () => {
-  document.getElementById('final').className = '';
-  document.querySelector('#dialogue .text').textContent = 'Case closed. Blackwood returns to its quiet rhythm. But the garden at Miller House grows a little wilder every year. A reminder that some truths, once uncovered, bloom regardless of who tends them.';
-  document.getElementById('dialogue').className = 'visible';
-  document.getElementById('dName').textContent = '\u2726 CASE FILE — BLACKWOOD';
-});
-
-startGame();
+runPrologue();
 animate();
-console.log('✦ BLACKWOOD — A Detective Mystery');
-console.log('✦ Three witnesses. Three clues. One truth.');
+console.log('✦ BLACKWOOD — A Cozy Mystery');
+console.log('✦ "She\u2019s not missing. She\u2019s hidden. — E.M."');
 </script>
 </body>
 </html>

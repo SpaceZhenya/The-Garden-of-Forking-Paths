@@ -832,6 +832,7 @@ function updateQuests(){
     const d=o.done(); const p=o.prog?o.prog():'';
     mh+='<div class="obj'+(d?' done':'')+'"><span class="ic">'+(d?'✓':'○')+'</span><span>'+o.text+(p?' <span style="color:#6a6a72">'+p+'</span>':'')+'</span></div>';
   });
+  if(S.inventory.length>=3) mh+='<div style="color:#5a5a62;font-size:11px;margin-top:8px;padding:8px;border:1px dashed rgba(200,200,220,0.06);border-radius:4px;line-height:1.6">the Miller House door is locked.<br>three digits hide in the town:<br>grave · well · newspaper</div>';
   mainEl.innerHTML=mh;
   let sh='<h3>✦ DISCOVERIES</h3>';
   QUESTS.side.forEach(q=>{
@@ -1093,6 +1094,8 @@ function startGame(){
     'look behind buildings — secrets hide in the snow',
     'Old Man Mercer might have useful items',
     'the old well, a grave marker, a locked chest — find them all',
+    'the Miller House door is locked — a 3-digit code waits to be found',
+    'a grave year · a locket\'s number · a newspaper issue — the code awaits',
   ];
   let hi=0; const hintEl=document.getElementById('hint');
   setInterval(()=>{ hi=(hi+1)%hints.length; hintEl.textContent=hints[hi]; },18000);

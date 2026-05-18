@@ -72,7 +72,9 @@ canvas { display:block; }
 .door-panel { background:rgba(18,18,22,0.98); border:1px solid rgba(200,200,220,0.08); border-radius:12px; padding:40px 50px 32px; text-align:center; max-width:360px; }
 .door-title { color:#e0d0b8; font-size:18px; letter-spacing:6px; font-weight:100; font-family:'Courier New',monospace; }
 .door-sub { color:#6a6a72; font-size:11px; letter-spacing:2px; margin-top:6px; font-family:'Courier New',monospace; }
-.door-dials { display:flex; gap:14px; justify-content:center; margin:28px 0 16px; }
+.door-dials { display:flex; gap:18px; justify-content:center; margin:28px 0 16px; }
+.door-dials .dial-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.door-dials .dial-label { color:#5a5a5a; font-size:8px; font-family:'Courier New',monospace; letter-spacing:2px; text-transform:uppercase; }
 .door-dials .dial { width:48px; height:56px; background:rgba(10,10,14,0.8); border:1px solid rgba(200,200,220,0.12); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:26px; color:#d0c8b8; cursor:pointer; font-family:'Courier New',monospace; transition:all 0.2s; user-select:none; }
 .door-dials .dial:hover { border-color:rgba(200,200,220,0.25); background:rgba(20,20,26,0.9); }
 .door-dials .dial:active { transform:scale(0.95); }
@@ -152,9 +154,9 @@ canvas { display:block; }
     <div class="door-title">✦ MILLER HOUSE</div>
     <div class="door-sub">An iron door with three numbered dials</div>
     <div class="door-dials">
-      <div class="dial" data-idx="0">0</div>
-      <div class="dial" data-idx="1">0</div>
-      <div class="dial" data-idx="2">0</div>
+      <div class="dial-wrap"><div class="dial-label">GRAVE</div><div class="dial" data-idx="0">0</div></div>
+      <div class="dial-wrap"><div class="dial-label">WELL</div><div class="dial" data-idx="1">0</div></div>
+      <div class="dial-wrap"><div class="dial-label">NEWS</div><div class="dial" data-idx="2">0</div></div>
     </div>
     <div class="door-msg" id="doorMsg">enter the code</div>
     <div class="door-hint-wrap"><span class="door-hint-btn" id="doorHintBtn">?</span><span class="door-hint-text" id="doorHintText"></span></div>
@@ -1012,10 +1014,10 @@ document.getElementById('doorCancel').addEventListener('click',closeDoorPuzzle);
 
 // ─── DOOR PUZZLE HINTS ────────────────────────────────
 const DOOR_HINTS = [
-  '1st digit: grave year · 2nd digit: well locket · 3rd digit: newspaper issue',
-  'the grave marker is behind the southwest buildings — the year holds the first digit',
-  'the old well behind the eastern houses — its locket whispers the second digit',
-  'the newspaper clipping from Elara — the issue number is the third digit',
+  'the labels show which digit goes where — find each number in the world',
+  'the grave marker is behind the southwest buildings — its year has the first digit',
+  'the old well behind the eastern houses — its locket has the second digit',
+  'the newspaper clipping from Elara — its issue number is the third digit',
 ];
 let hintIdx=0;
 const hintBtn=document.getElementById('doorHintBtn'), hintText=document.getElementById('doorHintText');

@@ -65,6 +65,24 @@ canvas { display:block; }
 #final .btn:hover { background:rgba(200,200,220,0.06); border-color:rgba(200,200,220,0.25); }
 
 @keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+#doorPuzzle { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(8,8,12,0.92); z-index:35; justify-content:center; align-items:center; backdrop-filter:blur(4px); }
+#doorPuzzle.visible { display:flex; }
+.door-panel { background:rgba(18,18,22,0.98); border:1px solid rgba(200,200,220,0.08); border-radius:12px; padding:40px 50px 32px; text-align:center; max-width:360px; }
+.door-title { color:#e0d0b8; font-size:18px; letter-spacing:6px; font-weight:100; font-family:'Courier New',monospace; }
+.door-sub { color:#6a6a72; font-size:11px; letter-spacing:2px; margin-top:6px; font-family:'Courier New',monospace; }
+.door-dials { display:flex; gap:14px; justify-content:center; margin:28px 0 16px; }
+.door-dials .dial { width:48px; height:56px; background:rgba(10,10,14,0.8); border:1px solid rgba(200,200,220,0.12); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:26px; color:#d0c8b8; cursor:pointer; font-family:'Courier New',monospace; transition:all 0.2s; user-select:none; }
+.door-dials .dial:hover { border-color:rgba(200,200,220,0.25); background:rgba(20,20,26,0.9); }
+.door-dials .dial:active { transform:scale(0.95); }
+.door-msg { color:#6a6a72; font-size:11px; font-family:'Courier New',monospace; letter-spacing:1px; min-height:20px; margin-bottom:16px; transition:color 0.3s; }
+.door-msg.fail { color:#cc6655; animation:shake 0.4s ease; }
+.door-msg.success { color:#7ab87a; }
+.door-btn { padding:10px 32px; background:rgba(200,200,220,0.06); border:1px solid rgba(200,200,220,0.12); color:#d0c8b8; font-size:12px; cursor:pointer; font-family:'Courier New',monospace; letter-spacing:3px; border-radius:6px; transition:all 0.3s; }
+.door-btn:hover { background:rgba(220,210,200,0.1); border-color:rgba(220,210,200,0.2); }
+.door-cancel { margin-left:8px; opacity:0.5; }
+.door-cancel:hover { opacity:1; }
 
 #questBtn { position:absolute; top:20px; left:20px; width:40px; height:40px; border:1px solid rgba(200,200,210,0.12); background:rgba(20,20,24,0.5); color:#d4c8b8; font-size:18px; cursor:pointer; pointer-events:all; border-radius:8px; backdrop-filter:blur(2px); transition:all 0.3s; display:flex; align-items:center; justify-content:center; z-index:15; }
 #questBtn:hover { background:rgba(40,40,48,0.7); border-color:rgba(200,200,210,0.25); }
@@ -125,6 +143,21 @@ canvas { display:block; }
 
 <div id="final"><p></p><p class="sub"></p><div class="btn-wrap"><button class="btn" id="stayBtn">✦ CLOSE CASE</button></div></div>
 
+<div id="doorPuzzle">
+  <div class="door-panel">
+    <div class="door-title">✦ MILLER HOUSE</div>
+    <div class="door-sub">An iron door with three numbered dials</div>
+    <div class="door-dials">
+      <div class="dial" data-idx="0">0</div>
+      <div class="dial" data-idx="1">0</div>
+      <div class="dial" data-idx="2">0</div>
+    </div>
+    <div class="door-msg" id="doorMsg">enter the code</div>
+    <button class="door-btn" id="doorSubmit">UNLOCK</button>
+    <button class="door-btn door-cancel" id="doorCancel">BACK</button>
+  </div>
+</div>
+
 <script type="importmap">
 {
   "imports": {
@@ -160,7 +193,7 @@ const NPC_DATA = [
         a:'She whispered about "her." I asked who. She went pale and said "my sister." Then she grabbed her things and left.' },
     ],
     farewell:'I hope you find her, detective. She was a good person. Scared, but good.',
-    item:{ name:'Newspaper Clipping', icon:'\uD83D\uDCF0', desc:'A yellowed article: "Fire at Miller Home\u2014One Child Presumed Dead."', give:'Here. I\u2019ve kept this for twenty years. The Miller fire. A little girl died that night. Or so they said.' }
+    item:{ name:'Newspaper Clipping', icon:'\uD83D\uDCF0', desc:'Blackwood Gazette, Issue No. 3: "Fire at Miller Home\u2014One Child Presumed Dead."', give:'Here. I\u2019ve kept this for twenty years. The Miller fire. A little girl died that night. Or so they said.' }
   },
   { id:'finch', name:'Dr. Helena Finch', shape:'icosahedron', color:0x5a8ab0, pos:[-0.5,0,3.2],
     intro:'Ah, you must be the detective. Helena Finch. I was Lydia\u2019s physician. Please, warm yourself by the fire.',
@@ -612,7 +645,7 @@ function addInteractiveObjects() {
     new THREE.MeshBasicMaterial({ transparent:true, opacity:0.001 }));
   wt.position.set(-4.0,0.15,3.5);
   wt.userData.interact={ id:'well',
-    msg:'The water below is dark and still. Something glimmers near the edge — a silver locket tangled in the rope. You pull it up. Engraved inside: "Together always — L & E."' };
+    msg:'The water below is dark and still. Something glimmers near the edge — a silver locket tangled in the rope. You pull it up. Engraved inside: "Together always — L & E. 7th winter."' };
   scene.add(wt); objectMeshes.push(wt);
 
   // Grave marker
@@ -628,7 +661,7 @@ function addInteractiveObjects() {
   gsn.position.set(0,0.34,0.003); gt.add(gsn);
   gt.position.set(-6.2,0,-3.8); scene.add(gt);
   gs.userData.interact={ id:'grave',
-    msg:'The stone is worn but legible:\n\nEMILY MARIE MILLER\n1997 – 2004\n"Forever in our hearts"\n\nSomeone has left fresh flowers in the snow.' };
+    msg:'The stone is worn but legible:\n\nEMILY MARIE MILLER\n1997 – 2004\n"Forever in our hearts"\n\nSomeone has left fresh flowers in the snow. The year of her death stares back at you.' };
   objectMeshes.push(gs);
 
   // Locked chest
@@ -923,7 +956,53 @@ function endGame(type){
 function checkTravel(){
   if(S.inventory.length>=3) document.getElementById('travelBtn').className='visible';
 }
-document.getElementById('travelBtn').addEventListener('click',()=>{ if(S.inventory.length>=3) startHouse(); });
+document.getElementById('travelBtn').addEventListener('click',()=>{ if(S.inventory.length>=3) showDoorPuzzle(); });
+
+// ─── DOOR PUZZLE ──────────────────────────────────────
+const DOOR_CODE = [4,7,3];
+let doorDials=[0,0,0];
+
+function showDoorPuzzle(){
+  S.dialogOpen=true; doorDials=[0,0,0];
+  const el=document.getElementById('doorPuzzle');
+  el.className='visible';
+  document.querySelectorAll('.dial').forEach((d,i)=>{
+    d.textContent='0'; d.style.borderColor='rgba(200,200,220,0.12)';
+  });
+  const msg=document.getElementById('doorMsg');
+  msg.textContent='enter the code'; msg.className='door-msg';
+}
+
+function closeDoorPuzzle(){
+  document.getElementById('doorPuzzle').className='';
+  S.dialogOpen=false;
+}
+
+function checkDoorCode(){
+  const msg=document.getElementById('doorMsg');
+  if(doorDials[0]===DOOR_CODE[0]&&doorDials[1]===DOOR_CODE[1]&&doorDials[2]===DOOR_CODE[2]){
+    msg.textContent='✓ click opens'; msg.className='door-msg success';
+    setTimeout(()=>{ closeDoorPuzzle(); startHouse(); },600);
+  } else {
+    msg.textContent='✗ the lock does not budge'; msg.className='door-msg fail';
+    setTimeout(()=>{ msg.className='door-msg'; },800);
+  }
+}
+
+document.querySelectorAll('.dial').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const idx=parseInt(el.dataset.idx);
+    const msg=document.getElementById('doorMsg');
+    if(msg.classList.contains('fail')||msg.classList.contains('success')) return;
+    doorDials[idx]=(doorDials[idx]+1)%10;
+    el.textContent=doorDials[idx];
+    el.style.borderColor='rgba(220,210,200,0.2)';
+    setTimeout(()=>{ el.style.borderColor='rgba(200,200,220,0.12)'; },200);
+  });
+});
+
+document.getElementById('doorSubmit').addEventListener('click',checkDoorCode);
+document.getElementById('doorCancel').addEventListener('click',closeDoorPuzzle);
 
 function updateInv(){
   const inv=document.getElementById('inventory'); inv.innerHTML='';

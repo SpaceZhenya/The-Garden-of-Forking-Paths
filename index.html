@@ -184,9 +184,9 @@ const QUESTS = {
     { text:'Make your choice', done:()=>S.ending!==null },
   ],
   side: [
-    { id:'well', title:'The Well of Whispers', desc:'Search the old well in the square. Something glimmers beneath the surface.' },
-    { id:'grave', title:'A Grave in the Snow', desc:'Find the grave marker behind the old church.' },
-    { id:'chest', title:'The Locked Chest', desc:'Find the rusty key and open the locked chest.' },
+    { id:'well', title:'The Well of Whispers', desc:'Search the old well behind the eastern houses. Something glimmers beneath the dark water.' },
+    { id:'grave', title:'A Grave in the Snow', desc:'Behind the southwest fringe buildings, near the treeline. A small stone marker half-buried in snow.' },
+    { id:'chest', title:'The Locked Chest', desc:'Old Man Mercer has the key somewhere. The chest is hidden behind the general store to the east.' },
   ],
 };
 
@@ -989,6 +989,16 @@ function startGame(){
   };
   requestAnimationFrame(appear);
   initAudio();
+  // cycling hints
+  const hints=[
+    'talk to the villagers · explore the town · uncover the truth',
+    'open the journal (◈) to track your discoveries',
+    'look behind buildings — secrets hide in the snow',
+    'Old Man Mercer might have useful items',
+    'the old well, a grave marker, a locked chest — find them all',
+  ];
+  let hi=0; const hintEl=document.getElementById('hint');
+  setInterval(()=>{ hi=(hi+1)%hints.length; hintEl.textContent=hints[hi]; },18000);
 }
 
 // ─── AUDIO ───────────────────────────────────────────

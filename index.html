@@ -83,6 +83,10 @@ canvas { display:block; }
 .door-btn:hover { background:rgba(220,210,200,0.1); border-color:rgba(220,210,200,0.2); }
 .door-cancel { margin-left:8px; opacity:0.5; }
 .door-cancel:hover { opacity:1; }
+.door-hint-wrap { margin-bottom:16px; min-height:20px; display:flex; align-items:center; justify-content:center; gap:6px; }
+.door-hint-btn { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border:1px solid rgba(200,200,220,0.1); border-radius:50%; color:#5a5a62; font-size:11px; cursor:pointer; font-family:'Courier New',monospace; transition:all 0.3s; flex-shrink:0; }
+.door-hint-btn:hover { border-color:rgba(200,200,220,0.3); color:#b0b0b8; background:rgba(200,200,220,0.04); }
+.door-hint-text { color:#6a6a72; font-size:10px; font-family:'Courier New',monospace; letter-spacing:1px; font-style:italic; }
 
 #questBtn { position:absolute; top:20px; left:20px; width:40px; height:40px; border:1px solid rgba(200,200,210,0.12); background:rgba(20,20,24,0.5); color:#d4c8b8; font-size:18px; cursor:pointer; pointer-events:all; border-radius:8px; backdrop-filter:blur(2px); transition:all 0.3s; display:flex; align-items:center; justify-content:center; z-index:15; }
 #questBtn:hover { background:rgba(40,40,48,0.7); border-color:rgba(200,200,210,0.25); }
@@ -153,6 +157,7 @@ canvas { display:block; }
       <div class="dial" data-idx="2">0</div>
     </div>
     <div class="door-msg" id="doorMsg">enter the code</div>
+    <div class="door-hint-wrap"><span class="door-hint-btn" id="doorHintBtn">?</span><span class="door-hint-text" id="doorHintText"></span></div>
     <button class="door-btn" id="doorSubmit">UNLOCK</button>
     <button class="door-btn door-cancel" id="doorCancel">BACK</button>
   </div>
@@ -1003,6 +1008,19 @@ document.querySelectorAll('.dial').forEach(el=>{
 
 document.getElementById('doorSubmit').addEventListener('click',checkDoorCode);
 document.getElementById('doorCancel').addEventListener('click',closeDoorPuzzle);
+
+// ─── DOOR PUZZLE HINTS ────────────────────────────────
+const DOOR_HINTS = [
+  'each dial needs a digit — one from a grave, one from a well, one from a newspaper',
+  'find the grave marker behind the southwest buildings — the year holds the first digit',
+  'the old well behind the eastern houses — its locket whispers the second digit',
+  'check the newspaper clipping from Elara — the issue number is the third digit',
+];
+let hintIdx=-1;
+document.getElementById('doorHintBtn').addEventListener('click',()=>{
+  hintIdx=(hintIdx+1)%DOOR_HINTS.length;
+  document.getElementById('doorHintText').textContent=DOOR_HINTS[hintIdx];
+});
 
 function updateInv(){
   const inv=document.getElementById('inventory'); inv.innerHTML='';

@@ -65,6 +65,22 @@ canvas { display:block; }
 #final .btn:hover { background:rgba(200,200,220,0.06); border-color:rgba(200,200,220,0.25); }
 
 @keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+
+#questBtn { position:absolute; top:20px; left:20px; width:40px; height:40px; border:1px solid rgba(200,200,210,0.12); background:rgba(20,20,24,0.5); color:#d4c8b8; font-size:18px; cursor:pointer; pointer-events:all; border-radius:8px; backdrop-filter:blur(2px); transition:all 0.3s; display:flex; align-items:center; justify-content:center; z-index:15; }
+#questBtn:hover { background:rgba(40,40,48,0.7); border-color:rgba(200,200,210,0.25); }
+#questLog { position:fixed; top:0; left:0; width:300px; height:100%; background:rgba(14,14,18,0.96); backdrop-filter:blur(10px); border-right:1px solid rgba(200,200,220,0.06); padding:28px 20px; transform:translateX(-100%); transition:transform 0.4s cubic-bezier(0.4,0,0.2,1); overflow-y:auto; pointer-events:all; z-index:20; }
+#questLog.open { transform:translateX(0); }
+#questLog .close-btn { position:absolute; top:14px; right:14px; background:none; border:none; color:#6a6a72; font-size:18px; cursor:pointer; font-family:'Courier New',monospace; transition:color 0.2s; padding:4px; }
+#questLog .close-btn:hover { color:#d0c8b8; }
+#questLog h3 { color:#e0d0b8; font-size:13px; letter-spacing:4px; font-weight:100; margin-bottom:10px; font-family:'Courier New',monospace; }
+#questLog .section { margin-bottom:28px; }
+#questLog .obj { display:flex; align-items:flex-start; gap:9px; padding:7px 6px; font-size:13px; color:#a8a8b0; line-height:1.5; font-family:'Georgia',serif; border-bottom:1px solid rgba(200,200,220,0.04); }
+#questLog .obj:last-child { border-bottom:none; }
+#questLog .obj.done { color:#8ab87a; }
+#questLog .obj .ic { font-size:14px; flex-shrink:0; margin-top:2px; width:16px; text-align:center; }
+#questLog .side-title { color:#c8c0b0; font-size:13px; letter-spacing:2px; margin-bottom:2px; font-family:'Courier New',monospace; }
+#questLog .side-desc { font-size:11px; color:#787880; line-height:1.5; margin-bottom:6px; font-family:'Georgia',serif; font-style:italic; padding-left:24px; }
+#questLog .hint { font-size:10px; color:#4a4a50; text-align:center; margin-top:20px; font-family:'Courier New',monospace; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -89,6 +105,13 @@ canvas { display:block; }
 
 <div id="ui">
   <div id="locName">◆ TOWN SQUARE — BLACKWOOD</div>
+  <button id="questBtn">◈</button>
+  <div id="questLog">
+    <button class="close-btn" id="questClose">✕</button>
+    <div class="section" id="questMain"></div>
+    <div class="section" id="questSide"></div>
+    <div class="hint">discover the town's secrets</div>
+  </div>
   <div id="inventory"></div>
   <div id="dialogue">
     <div class="name" id="dName"></div>
@@ -97,7 +120,7 @@ canvas { display:block; }
     <div class="cont" id="dCont">▼ continue</div>
   </div>
   <div id="travelBtn">→ TRAVEL TO MILLER HOUSE</div>
-  <div id="hint">click a character to talk to them</div>
+  <div id="hint">talk to the villagers &nbsp;·&nbsp; explore the town &nbsp;·&nbsp; uncover the truth</div>
 </div>
 
 <div id="final"><p></p><p class="sub"></p><div class="btn-wrap"><button class="btn" id="stayBtn">✦ CLOSE CASE</button></div></div>
@@ -152,6 +175,21 @@ const NPC_DATA = [
   },
 ];
 
+const QUESTS = {
+  main: [
+    { text:'Interview the townspeople', done:()=>S.npc.filter(n=>n.talkedTo).length>=3, prog:()=>S.npc.filter(n=>n.talkedTo).length+'/3' },
+    { text:'Gather evidence', done:()=>S.inventory.length>=3, prog:()=>S.inventory.length+'/3' },
+    { text:'Travel to Miller House', done:()=>S.phase==='house' },
+    { text:'Uncover the truth', done:()=>S.houseStep>=11 },
+    { text:'Make your choice', done:()=>S.ending!==null },
+  ],
+  side: [
+    { id:'well', title:'The Well of Whispers', desc:'Search the old well in the square. Something glimmers beneath the surface.' },
+    { id:'grave', title:'A Grave in the Snow', desc:'Find the grave marker behind the old church.' },
+    { id:'chest', title:'The Locked Chest', desc:'Find the rusty key and open the locked chest.' },
+  ],
+};
+
 const HOUSE_DIALOGUE = [
   'The door groans open. Warm, dusty air spills out into the cold.',
   'You step inside. Snow falls from your coat. The floorboards whimper.',
@@ -186,6 +224,7 @@ const S = {
   npc: NPC_DATA.map(() => ({ talkedTo:false, asked:[], itemGiven:false })),
   houseStep:0, ending:null,
   canInteract:false, dialogOpen:false,
+  quests:{ well:false, grave:false, chest:false },
 };
 
 // ─── THREE.JS ───────────────────────────────────────
@@ -565,6 +604,56 @@ const npcParticles = npcObjs.map((o,i)=>{
     speed:0.2+Math.random()*0.4, phase:Math.random()*Math.PI*2}))};
 });
 
+// ─── INTERACTIVE OBJECTS ────────────────────────────
+const objectMeshes = [];
+function addInteractiveObjects() {
+  // Well trigger
+  const wt = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.35,0.3,8),
+    new THREE.MeshBasicMaterial({ transparent:true, opacity:0.001 }));
+  wt.position.set(-4.0,0.15,3.5);
+  wt.userData.interact={ id:'well',
+    msg:'The water below is dark and still. Something glimmers near the edge — a silver locket tangled in the rope. You pull it up. Engraved inside: "Together always — L & E."' };
+  scene.add(wt); objectMeshes.push(wt);
+
+  // Grave marker
+  const gt=new THREE.Group();
+  const gs=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.25,0.02),
+    new THREE.MeshStandardMaterial({ color:0x4a4a52, roughness:0.8 }));
+  gs.position.set(0,0.125,0); gt.add(gs);
+  const gm=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.08,0.02),
+    new THREE.MeshStandardMaterial({ color:0x5a5a62, roughness:0.8 }));
+  gm.position.set(0,0.3,0); gt.add(gm);
+  const gsn=new THREE.Mesh(new THREE.BoxGeometry(0.17,0.01,0.02),
+    new THREE.MeshStandardMaterial({ color:0xe0e4e8, roughness:0.95 }));
+  gsn.position.set(0,0.34,0.003); gt.add(gsn);
+  gt.position.set(-6.2,0,-3.8); scene.add(gt);
+  gs.userData.interact={ id:'grave',
+    msg:'The stone is worn but legible:\n\nEMILY MARIE MILLER\n1997 – 2004\n"Forever in our hearts"\n\nSomeone has left fresh flowers in the snow.' };
+  objectMeshes.push(gs);
+
+  // Locked chest
+  const cg=new THREE.Group();
+  const cb=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.1,0.2),
+    new THREE.MeshStandardMaterial({ color:0x3a2a1a, roughness:0.85 }));
+  cb.position.set(0,0.05,0); cg.add(cb);
+  const cl=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.02,0.22),
+    new THREE.MeshStandardMaterial({ color:0x4a3a2a, roughness:0.8 }));
+  cl.position.set(0,0.12,0); cg.add(cl);
+  const clasp=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.02,0.03),
+    new THREE.MeshStandardMaterial({ color:0xc0b080, metalness:0.5 }));
+  clasp.position.set(0,0.14,0.09); cg.add(clasp);
+  const csn=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.01,0.24),
+    new THREE.MeshStandardMaterial({ color:0xe0e4e8, roughness:0.95 }));
+  csn.position.set(0,0.13,0); cg.add(csn);
+  cg.position.set(5.8,0,-3.2); scene.add(cg);
+  cb.userData.interact={ id:'chest', locked:true,
+    msg:'The chest is locked. An iron key with "Miller" engraved on it would open this.',
+    unlocked:'Inside the chest you find a faded photograph. Two identical girls, arms around each other, standing before the Miller house. On the back, in neat handwriting: "Lydia & Emily — Winter 2003."' };
+  objectMeshes.push(cb);
+}
+
+addInteractiveObjects();
+
 // ─── RAYCASTER ───────────────────────────────────────
 const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2();
 function hitNPC(){
@@ -583,7 +672,9 @@ function onClick(e){
   mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
   raycaster.setFromCamera(mouse,camera);
   const idx=hitNPC();
-  if(idx>=0&&!S.npc[idx].itemGiven) startDialogue(idx);
+  if(idx>=0&&!S.npc[idx].itemGiven) { startDialogue(idx); return; }
+  const objHits=raycaster.intersectObjects(objectMeshes,false);
+  if(objHits.length>0&&objHits[0].object.userData.interact) interactObj(objHits[0].object.userData.interact);
 }
 
 // ─── DIALOGUE ────────────────────────────────────────
@@ -606,7 +697,7 @@ function startDialogue(idx){
     cont=document.getElementById('dCont');
   box.className='visible'; choices.innerHTML=''; cont.className='';
   if(!ns.talkedTo){
-    ns.talkedTo=true; name.textContent='\u2726 '+data.name;
+    ns.talkedTo=true; updateQuests(); name.textContent='\u2726 '+data.name;
     tw(text,data.intro,22,()=>{ cont.textContent='▼ continue'; cont.className='show'; });
     if(dHandler) document.removeEventListener('click',dHandler);
     dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); showQ(idx); };
@@ -665,6 +756,56 @@ function askQ(idx,qi){
   document.addEventListener('click',dHandler);
 }
 
+// ─── INTERACTIVE OBJECT HANDLER ─────────────────────
+function interactObj(data){
+  S.dialogOpen=true;
+  const box=document.getElementById('dialogue'), name=document.getElementById('dName'),
+    text=document.getElementById('dText'), choices=document.getElementById('dChoices'),
+    cont=document.getElementById('dCont');
+  box.className='visible'; choices.innerHTML=''; cont.className='';
+
+  if(data.id==='chest'&&data.locked){
+    const hasKey=S.inventory.some(i=>i.name==='Rusty Key');
+    if(hasKey){
+      name.textContent='✦ You open the chest';
+      tw(text,data.unlocked,22,()=>{ cont.textContent='▼ close'; cont.className='show'; });
+      if(!S.quests.chest){ S.quests.chest=true; updateQuests(); }
+    } else {
+      name.textContent='✦ Locked Chest';
+      tw(text,data.msg,22,()=>{ cont.textContent='▼ close'; cont.className='show'; });
+    }
+  } else {
+    const titles={ well:'Old Well', grave:'Grave Marker' };
+    name.textContent='✦ '+(titles[data.id]||'Object');
+    tw(text,data.msg,22,()=>{ cont.textContent='▼ close'; cont.className='show'; });
+    if(!S.quests[data.id]){ S.quests[data.id]=true; updateQuests(); }
+  }
+  if(dHandler) document.removeEventListener('click',dHandler);
+  dHandler=()=>{ if(typing){ skipTyping=true; return; } document.removeEventListener('click',dHandler); closeD(); };
+  document.addEventListener('click',dHandler);
+}
+
+// ─── QUEST LOG ───────────────────────────────────────
+function updateQuests(){
+  const mainEl=document.getElementById('questMain'), sideEl=document.getElementById('questSide');
+  if(!mainEl) return;
+  let mh='<h3>✦ CASE FILE</h3>';
+  QUESTS.main.forEach(o=>{
+    const d=o.done(); const p=o.prog?o.prog():'';
+    mh+='<div class="obj'+(d?' done':'')+'"><span class="ic">'+(d?'✓':'○')+'</span><span>'+o.text+(p?' <span style="color:#6a6a72">'+p+'</span>':'')+'</span></div>';
+  });
+  mainEl.innerHTML=mh;
+  let sh='<h3>✦ DISCOVERIES</h3>';
+  QUESTS.side.forEach(q=>{
+    const d=S.quests[q.id];
+    sh+='<div class="obj'+(d?' done':'')+'"><span class="ic">'+(d?'✓':'○')+'</span><div><div class="side-title">'+q.title+'</div>'+(d?'':'<div class="side-desc">'+q.desc+'</div>')+'</div></div>';
+  });
+  sideEl.innerHTML=sh;
+}
+
+document.getElementById('questBtn').addEventListener('click',()=>{ document.getElementById('questLog').classList.toggle('open'); updateQuests(); });
+document.getElementById('questClose').addEventListener('click',()=>{ document.getElementById('questLog').classList.remove('open'); });
+
 function byeNPC(idx){
   const data=NPC_DATA[idx], text=document.getElementById('dText'),
     choices=document.getElementById('dChoices'), cont=document.getElementById('dCont');
@@ -677,7 +818,7 @@ function byeNPC(idx){
 
 // ─── HOUSE ───────────────────────────────────────────
 function startHouse(){
-  S.phase='house'; S.dialogOpen=true; document.getElementById('fade').style.opacity='1';
+  S.phase='house'; updateQuests(); S.dialogOpen=true; document.getElementById('fade').style.opacity='1';
   setTimeout(()=>{
     scene.background=new THREE.Color(0x1a1820); scene.fog=new THREE.Fog(0x1a1820,6,14);
     renderer.toneMappingExposure=1.8;
@@ -766,7 +907,7 @@ function houseChoice(){
 }
 
 function endGame(type){
-  S.ending=type; S.phase='ending'; const end=ENDINGS[type];
+  S.ending=type; S.phase='ending'; updateQuests(); const end=ENDINGS[type];
   const finalEl=document.getElementById('final');
   finalEl.querySelector('p').innerHTML=end.line+'<br><br>'+end.story;
   finalEl.querySelector('.sub').textContent=end.final;
@@ -786,6 +927,7 @@ document.getElementById('travelBtn').addEventListener('click',()=>{ if(S.invento
 
 function updateInv(){
   const inv=document.getElementById('inventory'); inv.innerHTML='';
+  updateQuests();
   S.inventory.forEach(item=>{
     const slot=document.createElement('div'); slot.className='slot filled';
     slot.textContent=item.icon;

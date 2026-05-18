@@ -832,7 +832,7 @@ function updateQuests(){
     const d=o.done(); const p=o.prog?o.prog():'';
     mh+='<div class="obj'+(d?' done':'')+'"><span class="ic">'+(d?'✓':'○')+'</span><span>'+o.text+(p?' <span style="color:#6a6a72">'+p+'</span>':'')+'</span></div>';
   });
-  if(S.inventory.length>=3) mh+='<div style="color:#5a5a62;font-size:11px;margin-top:8px;padding:8px;border:1px dashed rgba(200,200,220,0.06);border-radius:4px;line-height:1.6">the Miller House door is locked.<br>three digits hide in the town:<br>grave · well · newspaper</div>';
+  if(S.inventory.length>=3) mh+='<div style="color:#5a5a62;font-size:11px;margin-top:8px;padding:8px;border:1px dashed rgba(200,200,220,0.06);border-radius:4px;line-height:1.6">Miller House door needs 3 digits.<br>order: ① grave year — ② well locket — ③ newspaper issue</div>';
   mainEl.innerHTML=mh;
   let sh='<h3>✦ DISCOVERIES</h3>';
   QUESTS.side.forEach(q=>{
@@ -1012,15 +1012,17 @@ document.getElementById('doorCancel').addEventListener('click',closeDoorPuzzle);
 
 // ─── DOOR PUZZLE HINTS ────────────────────────────────
 const DOOR_HINTS = [
-  'each dial needs a digit — one from a grave, one from a well, one from a newspaper',
-  'find the grave marker behind the southwest buildings — the year holds the first digit',
+  '1st digit: grave year · 2nd digit: well locket · 3rd digit: newspaper issue',
+  'the grave marker is behind the southwest buildings — the year holds the first digit',
   'the old well behind the eastern houses — its locket whispers the second digit',
-  'check the newspaper clipping from Elara — the issue number is the third digit',
+  'the newspaper clipping from Elara — the issue number is the third digit',
 ];
-let hintIdx=-1;
-document.getElementById('doorHintBtn').addEventListener('click',()=>{
+let hintIdx=0;
+const hintBtn=document.getElementById('doorHintBtn'), hintText=document.getElementById('doorHintText');
+hintText.textContent=DOOR_HINTS[0];
+hintBtn.addEventListener('click',()=>{
   hintIdx=(hintIdx+1)%DOOR_HINTS.length;
-  document.getElementById('doorHintText').textContent=DOOR_HINTS[hintIdx];
+  hintText.textContent=DOOR_HINTS[hintIdx];
 });
 
 function updateInv(){
